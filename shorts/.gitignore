@@ -1,3 +1,6 @@
 node_modules/
-*/vo/
-*/mix.wav
+vo/
+mix.wav
+still_*.jpg
+stills/
+sheet*.jpg

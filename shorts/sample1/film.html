@@ -1,0 +1,121 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:Baloo;font-weight:800;src:url(../node_modules/@fontsource/baloo-2/files/baloo-2-devanagari-800-normal.woff2)}
+@font-face{font-family:Baloo;font-weight:800;src:url(../node_modules/@fontsource/baloo-2/files/baloo-2-latin-800-normal.woff2);unicode-range:U+0000-00FF,U+20B9}
+@font-face{font-family:Noto;font-weight:700;src:url(../node_modules/@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-devanagari-700-normal.woff2)}
+@font-face{font-family:Noto;font-weight:700;src:url(../node_modules/@fontsource/noto-sans-devanagari/files/noto-sans-devanagari-latin-700-normal.woff2);unicode-range:U+0000-00FF,U+20B9}
+html,body{margin:0;background:#000}canvas{display:block}
+</style>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+const W=1080,H=1920,cv=document.getElementById('c'),g=cv.getContext('2d');
+const C={bg1:'#0B1437',bg2:'#1B1F6B',y:'#FFD23F',gr:'#2EE59D',pk:'#FF5C8A',w:'#FFFFFF',dim:'#8FA0E8'};
+let T=null; // timings injected
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const prog=(t,a,d)=>clamp((t-a)/d);
+const eo=x=>1-Math.pow(1-x,3);
+const eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const back=x=>{const c=1.70158*1.4;return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2)};
+const bounce=x=>{const n=7.5625,d=2.75;if(x<1/d)return n*x*x;if(x<2/d)return n*(x-=1.5/d)*x+.75;if(x<2.5/d)return n*(x-=2.25/d)*x+.9375;return n*(x-=2.625/d)*x+.984375};
+function txt(s,x,y,size,col,o={}){g.save();g.font=`${o.w||800} ${size}px ${o.f||'Baloo'}`;g.textAlign=o.al||'center';g.textBaseline='middle';
+  g.globalAlpha*=o.a??1;if(o.sh!==false){g.shadowColor='rgba(0,0,0,.35)';g.shadowBlur=18;g.shadowOffsetY=6}
+  if(o.stroke){g.lineWidth=o.stroke;g.strokeStyle=o.sc||C.bg1;g.lineJoin='round';g.strokeText(s,x,y)}
+  g.fillStyle=col;g.fillText(s,x,y);g.restore()}
+function pop(x,y,s,fn){g.save();g.translate(x,y);g.scale(s,s);fn();g.restore()}
+function rr(x,y,w,h,r){g.beginPath();g.roundRect(x,y,w,h,r)}
+function coin(x,y,r,rot=0){g.save();g.translate(x,y);g.scale(Math.cos(rot)||.02,1);
+  g.shadowColor='rgba(0,0,0,.35)';g.shadowBlur=20;g.shadowOffsetY=8;
+  g.fillStyle='#E0A800';g.beginPath();g.arc(0,0,r,0,7);g.fill();g.shadowColor='transparent';
+  g.fillStyle=C.y;g.beginPath();g.arc(0,0,r*.84,0,7);g.fill();
+  g.strokeStyle='#FFF1B0';g.lineWidth=r*.06;g.beginPath();g.arc(0,0,r*.7,3.6,5.2);g.stroke();
+  g.fillStyle='#9A6B00';g.font=`800 ${r*1.05}px Baloo`;g.textAlign='center';g.textBaseline='middle';g.fillText('₹',0,r*.06);g.restore()}
+const FV=y=>3000*((Math.pow(1.01,12*y)-1)/0.01), INV=y=>36000*y;
+const fmt=v=>v>=1e7?'₹'+(v/1e7).toFixed(2)+' करोड़':v>=1e5?'₹'+(v/1e5).toFixed(1)+' लाख':'₹'+Math.round(v).toLocaleString('en-IN');
+
+function bg(t){const gr=g.createLinearGradient(0,0,W*.4,H);gr.addColorStop(0,C.bg1);gr.addColorStop(1,C.bg2);g.fillStyle=gr;g.fillRect(0,0,W,H);
+  g.save();g.globalAlpha=.07;g.strokeStyle='#fff';g.lineWidth=2;const off=(t*30)%90;
+  for(let x=-90+off;x<W+90;x+=90){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke()}
+  for(let y=-90+off;y<H+90;y+=90){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke()}g.restore();
+  for(let i=0;i<14;i++){const px=(i*197.3)%W,py=H-((t*(40+i*7)+i*311)%(H+200))+100,r=10+(i*13%26);
+    g.save();g.globalAlpha=.10;g.fillStyle=i%3?C.y:C.gr;g.beginPath();g.arc(px+Math.sin(t+i)*30,py,r,0,7);g.fill();g.restore()}}
+
+const S={
+hook(t,d){ // coin drops, title, question
+  const p=bounce(prog(t,0,.9));coin(W/2,-200+p*880,190,0);
+  const a=eo(prog(t,.55,.4));pop(W/2,1060,.6+.4*back(prog(t,.55,.5)),()=>txt('रोज़ ₹100',0,0,190,C.w,{a}));
+  const b=prog(t,1.25,.4);txt('की बचत',W/2,1215,84,C.dim,{a:eo(b),f:'Noto',w:700});
+  const q=prog(t,d*.58,.45);if(q>0)pop(W/2,1400,back(q),()=>{g.rotate(Math.sin(t*5)*.03);
+    rr(-400,-95,800,190,50);g.fillStyle=C.pk;g.fill();txt('करोड़पति?',0,4,140,C.w)})},
+month(t,d){ // 30 coins grid
+  txt('30 दिन',W/2,330,120,C.w,{a:eo(prog(t,0,.3))});
+  const n=Math.floor(prog(t,.15,d*.55)*30);
+  for(let i=0;i<30;i++){const cx=215+(i%6)*130,cy=520+Math.floor(i/6)*130;
+    g.save();g.globalAlpha=.15;g.fillStyle='#fff';g.beginPath();g.arc(cx,cy,48,0,7);g.fill();g.restore();
+    if(i<n){const k=prog(t,.15+i*(d*.55/30),.18);pop(cx,cy,back(k),()=>coin(0,0,52))}}
+  const e=prog(t,d*.62,.4);if(e>0){pop(W/2,1290,back(e),()=>{txt('= ₹3,000',0,0,200,C.y)});
+    txt('हर महीने',W/2,1440,86,C.w,{a:eo(prog(t,d*.72,.3)),f:'Noto',w:700})}},
+rate(t,d){ // ring to 12%
+  txt('हर महीने निवेश',W/2,360,104,C.w,{a:eo(prog(t,0,.35))});
+  for(let i=0;i<3;i++){const k=(t*.9+i/3)%1;coin(W/2-360+k*250,620-Math.sin(k*Math.PI)*120,46,k*6)}
+  const r=prog(t,d*.42,.9),cx=W/2,cy=930,R=250;
+  g.save();g.lineCap='round';g.lineWidth=46;g.strokeStyle='rgba(255,255,255,.12)';g.beginPath();g.arc(cx,cy,R,0,7);g.stroke();
+  g.strokeStyle=C.gr;g.shadowColor=C.gr;g.shadowBlur=30;g.beginPath();g.arc(cx,cy,R,-Math.PI/2,-Math.PI/2+eo(r)*Math.PI*2*.12*3.2);g.stroke();g.restore();
+  txt(Math.round(eo(r)*12)+'%',cx,cy+8,210,C.w);
+  txt('सालाना रिटर्न',W/2,1300,96,C.gr,{a:eo(prog(t,d*.5,.3))});
+  txt('(मान लें)',W/2,1410,64,C.dim,{a:eo(prog(t,d*.6,.3)),f:'Noto',w:700})},
+chart(yr,t,flash){ // shared growth chart, yr = current year (float)
+  const x0=140,x1=960,y0=1280,y1=560,ymax=Math.max(FV(yr)*1.18,4e5);
+  const X=y=>x0+(x1-x0)*y/30,Y=v=>y0-(y0-y1)*v/ymax;
+  g.save();g.strokeStyle='rgba(255,255,255,.25)';g.lineWidth=4;g.beginPath();g.moveTo(x0,y1-40);g.lineTo(x0,y0);g.lineTo(x1+30,y0);g.stroke();
+  for(const m of[10,20,30]){txt(m+' साल',X(m),y0+60,50,yr>=m-.01?C.w:C.dim,{f:'Noto',w:700,sh:false});
+    g.setLineDash([8,12]);g.beginPath();g.moveTo(X(m),y0);g.lineTo(X(m),y1-40);g.stroke();g.setLineDash([])}
+  // area
+  const gr=g.createLinearGradient(0,y1,0,y0);gr.addColorStop(0,'rgba(46,229,157,.55)');gr.addColorStop(1,'rgba(46,229,157,.03)');
+  g.beginPath();g.moveTo(x0,y0);for(let y=0;y<=yr;y+=.25)g.lineTo(X(y),Y(FV(y)));g.lineTo(X(yr),Y(FV(yr)));g.lineTo(X(yr),y0);g.closePath();g.fillStyle=gr;g.fill();
+  g.beginPath();g.moveTo(x0,y0);for(let y=0;y<=yr;y+=.25)g.lineTo(X(y),Y(FV(y)));g.lineTo(X(yr),Y(FV(yr)));
+  g.lineWidth=12;g.lineJoin='round';g.lineCap='round';g.strokeStyle=C.gr;g.shadowColor=C.gr;g.shadowBlur=26;g.stroke();g.shadowBlur=0;
+  g.beginPath();g.moveTo(x0,y0);g.lineTo(X(yr),Y(INV(yr)));g.lineWidth=7;g.strokeStyle=C.y;g.setLineDash([18,14]);g.stroke();g.setLineDash([]);
+  g.fillStyle='#fff';g.beginPath();g.arc(X(yr),Y(FV(yr)),20+flash*14,0,7);g.fill();g.restore();
+  // legend
+  g.fillStyle=C.gr;rr(150,1420,44,16,8);g.fill();txt('कुल रकम',215,1428,46,C.w,{al:'left',f:'Noto',w:700,sh:false});
+  g.fillStyle=C.y;rr(560,1420,44,16,8);g.fill();txt('आपने डाले',625,1428,46,C.w,{al:'left',f:'Noto',w:700,sh:false});
+  // counter
+  txt(Math.floor(yr)+' साल में',W/2,250,84,C.dim,{f:'Noto',w:700});
+  pop(W/2,400,1+flash*.12,()=>txt(fmt(FV(yr)),0,0,yr>=29.99?170:160,yr>=29.99?C.y:C.w))},
+y10(t,d){const k=eio(prog(t,0,d*.8));S.chart(.01+k*9.99,t,Math.max(0,1-Math.abs(t-d*.82)*4))},
+y20(t,d){const k=eio(prog(t,0,d*.8));S.chart(10+k*10,t,Math.max(0,1-Math.abs(t-d*.82)*4))},
+y30(t,d){const k=eio(prog(t,0,d*.8));S.chart(20+k*10,t,Math.max(0,1-Math.abs(t-d*.82)*4));
+  if(k>=1)for(let i=0;i<26;i++){const q=prog(t,d*.8,1.1),a=i*2.4,r=q*(300+i*17%260);
+    g.save();g.globalAlpha=1-q;g.fillStyle=[C.y,C.gr,C.pk,C.w][i%4];g.translate(W/2+Math.cos(a)*r,400+Math.sin(a)*r+q*q*260);g.rotate(a+t*6);g.fillRect(-14,-8,28,16);g.restore()}},
+bars(t,h1,h2,split){const base=1330,bw=300,xa=160,xb=620,HB=820,ha=HB*INV(30)/FV(30);
+  rr(xb,base-HB*h2,bw,HB*h2,26);g.fillStyle=C.gr;g.fill();
+  if(split>0){g.save();g.globalAlpha=split;rr(xb,base-ha,bw,ha,26);g.fillStyle=C.y;g.fill();g.restore()}
+  rr(xa,base-ha*h1,bw,Math.max(ha*h1,1),22);g.fillStyle=C.y;g.fill();
+  g.fillStyle='rgba(255,255,255,.3)';g.fillRect(100,base,880,5);
+  txt('आपने डाले',xa+bw/2,base+70,54,C.w,{f:'Noto',w:700});txt('कुल रकम',xb+bw/2,base+70,54,C.w,{f:'Noto',w:700});
+  if(h1>.9)txt('₹10.8 लाख',xa+bw/2,base-ha-60,74,C.y);
+  if(h2>.9)txt('₹1.05 करोड़',xb+bw/2,base-HB-60,74,C.gr)},
+put(t,d){txt('30 साल बाद',W/2,260,110,C.w,{a:eo(prog(t,0,.3))});
+  S.bars(t,eo(prog(t,d*.45,.5)),eo(prog(t,.1,.7)),0)},
+end(t,d){const s=eo(prog(t,0,.5));S.bars(t,1,1,s);
+  const k=prog(t,.3,.5);if(k>0)pop(W/2,235,back(k),()=>{txt('₹94 लाख',0,-40,150,C.gr);txt('कंपाउंडिंग ने कमाए',0,90,76,C.w,{f:'Noto',w:700})});
+  const e=prog(t,d*.55,.45);if(e>0){g.save();g.globalAlpha=eo(e)*.94;g.fillStyle=C.bg1;g.fillRect(0,0,W,H);g.restore();
+    pop(W/2,860,back(e)*(1+Math.sin(t*4)*.02),()=>{rr(-430,-130,860,260,70);g.fillStyle=C.y;g.fill();txt('आज ही शुरू करें',0,6,128,C.bg1,{sh:false})});
+    txt('जितना जल्दी, उतना ज़्यादा',W/2,1090,70,C.w,{a:eo(prog(t,d*.65,.3)),f:'Noto',w:700});
+    txt('सिर्फ़ शिक्षा के लिए · रिटर्न की गारंटी नहीं',W/2,1250,42,'#C9D2FF',{a:eo(prog(t,d*.7,.3)),f:'Noto',w:700,sh:false})}}
+};
+
+function caption(t){const L=T.lines.find(l=>t>=l.start-.1&&t<l.end+.2);if(!L)return;
+  const k=back(prog(t,L.start-.1,.25));g.save();g.font='700 54px Noto';const w=Math.min(g.measureText(L.cap).width+90,1000);g.restore();
+  pop(W/2,1585,.8+.2*k,()=>{g.save();g.globalAlpha=.9;rr(-w/2,-58,w,116,34);g.fillStyle='#050A24';g.fill();g.restore();
+    txt(L.cap,0,4,54,C.w,{f:'Noto',w:700,sh:false})})}
+
+window.render=function(t){g.clearRect(0,0,W,H);bg(t);
+  const L=T.lines;let i=0;for(let k=0;k<L.length;k++)if(t>=L[k].start-.15)i=k;
+  const s0=i?L[i].start-.15:0,s1=i<L.length-1?L[i+1].start-.15:T.total,lt=t-s0,d=s1-s0;
+  g.save();const fin=eo(prog(lt,0,.22));g.globalAlpha=fin;g.translate(0,(1-fin)*60);S[L[i].id](lt,d);g.restore();
+  caption(t);
+  g.fillStyle='rgba(255,255,255,.15)';g.fillRect(0,0,W,10);g.fillStyle=C.y;g.fillRect(0,0,W*t/T.total,10)};
+window.init=async function(tm){T=tm;await Promise.all([document.fonts.load('800 50px Baloo','रोज़ ₹1a'),document.fonts.load('700 50px Noto','रोज़ ₹1a')]);await document.fonts.ready;return true};
+</script>

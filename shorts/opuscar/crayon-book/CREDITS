@@ -1,0 +1,9 @@
+Crayon Picture Book version of the Hindi bus story.
+
+engine.js: crayon / watercolour-resist compositor and stroke engine adapted from the
+  "Crayon Picture Book" style demo ("The Moon Can't Sleep", LemoLab x Claude) in the
+  Lemo-Opuscar style library (demo/gl.js, demo/crayon.js, demo/rig.js). Technique code only;
+  no story, shots, characters or props of that demo are used.
+Characters, sets, shots, animation (film.html): original for this film.
+Font: Kalam (Indian Type Foundry), SIL Open Font License 1.1, via @fontsource/kalam.
+Style grammar reference only (nothing copied): Raymond Briggs, "The Snowman" (1982).

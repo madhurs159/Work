@@ -1,0 +1,6 @@
+Hindi story Short, Paper-cut Lightbox style. All picture is drawn in code (Canvas 2D) in this folder.
+Style rules and drawing techniques (paper grain, lit rim / dark under-edge "finish", backlight-through-paper idea,
+flicker formula) are adapted from the Lemo-Opuscar library by Lemomo (LemoLab), style "paper-lantern"
+(https://github.com/lemomo-ai/lemo-opuscar; docs CC BY-NC 4.0, see that repository's LICENSE for its code terms).
+No demo story, shots, props, fonts or media were reused.
+Font: Tiro Devanagari Hindi (SIL Open Font License 1.1), via @fontsource.

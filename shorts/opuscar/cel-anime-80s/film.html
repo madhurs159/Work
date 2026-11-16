@@ -1,0 +1,59 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:Mukta;font-weight:600;src:url(../../node_modules/@fontsource/mukta/files/mukta-devanagari-600-normal.woff2)}
+@font-face{font-family:Mukta;font-weight:600;src:url(../../node_modules/@fontsource/mukta/files/mukta-latin-600-normal.woff2);unicode-range:U+0000-00FF,U+2026}
+@font-face{font-family:Mukta;font-weight:800;src:url(../../node_modules/@fontsource/mukta/files/mukta-devanagari-800-normal.woff2)}
+@font-face{font-family:Mukta;font-weight:800;src:url(../../node_modules/@fontsource/mukta/files/mukta-latin-800-normal.woff2);unicode-range:U+0000-00FF,U+2026}
+@font-face{font-family:Rozha;font-weight:400;src:url(../../node_modules/@fontsource/rozha-one/files/rozha-one-devanagari-400-normal.woff2)}
+@font-face{font-family:Rozha;font-weight:400;src:url(../../node_modules/@fontsource/rozha-one/files/rozha-one-latin-400-normal.woff2);unicode-range:U+0000-00FF,U+2026}
+html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}
+</style>
+<canvas id="gl" width="1080" height="1920"></canvas>
+<script src="lib.js"></script>
+<script src="post.js"></script>
+<script src="fx.js"></script>
+<script src="chars.js"></script>
+<script src="scenes.js"></script>
+<script>
+// 80s cel anime: scene canvas (g) + emissive canvas (e) + cel layer (c, stamped black into e) + subtitle canvas (ov) -> tape/CRT pass
+const [sc, g] = canvas(W, H), [gc, e] = canvas(W, H), [cc, c] = canvas(W, H), [ovc, ov] = canvas(W, H);
+let POST = null, T = null;
+const RAW = { bloom: 0, halo: 0, soft: 0, flick: 0, lift: 0, contrast: 0, fade: 0, sat: 1, tint: [1, 1, 1], scan: 0, grille: 0, bleed: 1, rshift: 0, glow: 0, corner: 0, noiseA: 0, power: 1, track: 0, expo: 1 };
+
+function chunks(L) { if (L._c) return L._c; const parts = L.say.split(/(?<=[।,?!])\s*/).filter(Boolean), tot = parts.reduce((a, p) => a + p.length, 0); let s = L.start;
+  return L._c = parts.map(p => { const d = (L.end - L.start) * p.length / tot, o = { s, e: s + d, p: p.replace(/[।,]$/, '') }; s += d; return o; }); }
+// who speaks a chunk (second colour + boxed tag for dialogue)
+const SPEAK = { call: { 1: 'A', 2: 'A' }, woman: { 2: 'O', 3: 'O' } };
+function caption(t) {
+  ov.setTransform(1, 0, 0, 1, 0, 0); ov.clearRect(0, 0, W, H);
+  for (const L of T.lines) { if (t < L.start - .05 || t > L.end + .3) continue;
+    const cs = chunks(L), ci = Math.max(0, cs.findIndex(x => t < x.e)), ch = cs.find(x => t < x.e) || cs[cs.length - 1], idx = cs.indexOf(ch);
+    const who = (SPEAK[L.id] || {})[idx];
+    ov.save(); ov.font = '800 78px Mukta'; ov.textAlign = 'center'; ov.textBaseline = 'middle'; ov.lineJoin = 'round';
+    let rows = [ch.p]; if (ov.measureText(ch.p).width > 930) { const w = ch.p.split(' '), h = Math.ceil(w.length / 2); rows = [w.slice(0, h).join(' '), w.slice(h).join(' ')]; }
+    const y0 = 1580 - (rows.length - 1) * 48;
+    if (who) { const tag = who === 'A' ? 'अर्जुन' : 'बूढ़ी औरत', col = who === 'A' ? '#8ff4ff' : '#ffb0e0'; ov.font = '800 40px Mukta'; const tw = ov.measureText(tag).width + 70;
+      const tx = W / 2 - tw / 2, ty = y0 - 118; ov.fillStyle = rgba('#07121a', .8); ov.beginPath(); ov.roundRect(tx, ty, tw, 58, 8); ov.fill(); ov.strokeStyle = col; ov.lineWidth = 3; ov.stroke();
+      ov.fillStyle = '#ff4a4a'; ov.beginPath(); ov.arc(tx + 26, ty + 29, 8, 0, 7); ov.fill(); ov.fillStyle = col; ov.textAlign = 'left'; ov.fillText(tag, tx + 46, ty + 31); ov.textAlign = 'center'; ov.font = '800 78px Mukta'; }
+    rows.forEach((r, i) => { const y = y0 + i * 96;
+      ov.shadowColor = 'rgba(0,0,0,.6)'; ov.shadowBlur = 12; ov.shadowOffsetY = 4; ov.strokeStyle = '#120a1e'; ov.lineWidth = 16; ov.strokeText(r, W / 2, y);
+      ov.shadowColor = 'transparent'; ov.fillStyle = who === 'A' ? '#8ff4ff' : who === 'O' ? '#ffc0e6' : '#fff0a0'; ov.fillText(r, W / 2, y); });
+    ov.restore(); return; }
+}
+function resetAll() { for (const x of [g, e, c]) { x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.filter = 'none'; x.shadowColor = 'transparent'; }
+  g.fillStyle = '#000'; g.fillRect(0, 0, W, H); e.fillStyle = '#000'; e.fillRect(0, 0, W, H); c.clearRect(0, 0, W, H); LWK.k = 1; }
+window.render = function (t) {
+  resetAll();
+  if (t < 0) { modelSheet(); ov.clearRect(0, 0, W, H); POST.render(sc, gc, 0, ovc, RAW); return; }
+  const L = T.lines; let i = 0; for (let k = 0; k < L.length; k++) if (t >= L[k].start - .3) i = k;
+  const s0 = i ? L[i].start - .3 : 0, s1 = i < L.length - 1 ? L[i + 1].start - .3 : T.total;
+  const over = SCENES[L[i].id]({ t, lt: t - s0, d: s1 - s0, L: L[i] }) || {};
+  for (const x of [g, e, c, ov]) x.setTransform(1, 0, 0, 1, 0, 0);
+  caption(t); if (over.osd) over.osd(ov);
+  POST.render(sc, gc, Math.round(t * 30), ovc, { power: Math.min(1, t / .6), ...over });
+};
+window.init = async function (tm) { T = tm;
+  for (const f of ['800 50px Mukta', '600 50px Mukta', '400 50px Rozha']) await document.fonts.load(f, 'रात के ग्यारह 11:40 PM फ़ॉलो');
+  await document.fonts.ready; POST = makePost(document.getElementById('gl')); buildAssets(); return true; };
+</script>

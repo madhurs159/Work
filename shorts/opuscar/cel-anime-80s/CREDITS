@@ -1,0 +1,5 @@
+# Credits
+Drawing technique code in lib.js, post.js and chars.js is adapted from the "80s Cel Anime" style demo of the
+Lemo-Opuscar style library (styles/cel-anime-80s/demo: cel.js, post.js, head80.js, rider.js `limb`), licensed
+"same as that repository". Story, characters, shots and backgrounds here are new.
+Fonts: Mukta, Rozha One (SIL OFL 1.1) via @fontsource.

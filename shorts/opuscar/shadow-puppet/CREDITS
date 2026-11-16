@@ -1,0 +1,7 @@
+Shadow-puppet Hindi story short.
+
+Engine code adapted from Lemo-Opuscar (https://github.com/lemomo-ai/lemo-opuscar), styles/shadow-puppet/demo:
+carve.js (hide-carving helpers, pattern library, hide texture) and gl.js (lamp x transmission x cloth compositor),
+Copyright (c) 2026 Lemomo (LemoLab), MIT License. All puppets, sets, staging and shots in film.js are new.
+
+Fonts (loaded from ../../node_modules/@fontsource): Tiro Devanagari Hindi, Rozha One - SIL Open Font License 1.1.

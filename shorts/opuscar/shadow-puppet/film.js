@@ -289,7 +289,7 @@ window.render = function (t) {
   fr.setTransform(1, 0, 0, 1, 0, 0); fr.clearRect(0, 0, W, H); fr.drawImage(FRAMEC, 0, 0); placard(fr, t);
   GLr.render(trc, frc, {
     cam: st.cam, ctr: [CX, CY], rect: RECT, lamps, sigB: 540, sigC: 88, amb: .2, expo: 1.75 * (st.expoK || 1) / Math.sqrt(tot), time: t,
-    fade: st.fade || 0, fadeCol: [1, .9, .7], bloom: .42, thr: .7, vign: .5, sat: 1.1, contrast: .2, grain: .035, grainSeed: Math.floor(t * 30) * 17.13,
+    fade: st.fade || 0, fadeCol: [1, .9, .7], bloom: .42, thr: .7, vign: .5, sat: 1.1, contrast: .2, grain: .012, grainSeed: Math.floor(t * 30) * 17.13,
   });
 };
 window.init = async function (tm) {

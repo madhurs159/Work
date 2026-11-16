@@ -1,8 +1,8 @@
 'use strict';
 // Jointed paper figures (profile): body sheet + limb sheets pinned at the joints; rotation only.
-const ARJ = { skin: '#c2a28a', hair: '#0f1226', shirt: '#b83c28', pants: '#1d2750', shoe: '#0c0f22' };
-const CON = { skin: '#a98c72', hair: '#141218', shirt: '#857a52', pants: '#4b4731', shoe: '#15130f', cap: '#5f5838', mus: 1, bag: '#2a2016' };
-const DARKF = { skin: '#0b161a', hair: '#050a0d', shirt: '#4a1a12', pants: '#081014', shoe: '#050a0d' };
+const ARJ = { skin: '#a88c76', hair: '#0f1226', shirt: '#a83524', pants: '#1d2750', shoe: '#0c0f22' };
+const CON = { skin: '#977d66', hair: '#141218', shirt: '#7a7049', pants: '#4b4731', shoe: '#15130f', cap: '#5f5838', mus: 1, bag: '#2a2016' };
+const DARKF = { eyeW: '#44575a', pupil: '#020405', skin: '#0b161a', hair: '#050a0d', shirt: '#4a1a12', pants: '#081014', shoe: '#050a0d' };
 const P2 = d => new Path2D(d);
 const capsule = (L, w) => { const p = new Path2D(); p.roundRect(-w / 2, -w / 2, w, L + w, w / 2); return p; };
 const FACE = P2('M-4,-56 C26,-60 46,-40 47,-16 L49,-8 Q54,0 64,12 Q66,17 54,19 L52,23 Q57,26 56,30 L51,33 Q56,36 54,41 Q50,46 50,50 Q48,62 32,64 Q10,64 -8,52 C-44,48 -58,10 -54,-14 C-50,-44 -28,-56 -4,-56 Z');
@@ -21,10 +21,11 @@ function headP(x, C, P, s) {
   if (C.cap) { part(x, HAIRB, C.hair); part(x, CAP, C.cap); } else part(x, HAIR, C.hair);
   if (C.mus) part(x, ell(50, 23, 13, 5.5, .15), C.hair, { rim: 1.5 });
   const e = P.eye ?? .4;
-  x.save(); x.translate(31, -9); const m = x.getTransform(); hole(x, ell(0, 0, 8.5 + e * 2.5, 2.6 + e * 6.4)); x.restore();
+  x.save(); x.translate(31, -9); const m = x.getTransform();
+  part(x, ell(0, 0, 9 + e * 3, 3 + e * 7.5), C.eyeW || '#b7b1a0', { rim: 1.5 }); part(x, circ(2.5 + (P.gx || 0) * 4, (P.gy || 0) * 3, 4.6 - e * 1.4), C.pupil || '#0c0a10', { rim: .6 }); x.restore();
   if (s) s.eye = [m.e, m.f];
-  x.save(); x.translate(31, -24 - e * 5); x.rotate(P.brow || 0); hole(x, rect(-13, -2, 26, 4, 2)); x.restore();
-  const mo = P.mouth || 0; if (mo > 0) { const w = new Path2D(); w.moveTo(60, 31 - mo * 3); w.lineTo(33, 30 + mo * 2); w.lineTo(56, 34 + mo * 15); w.closePath(); hole(x, w); }
+  x.save(); x.translate(31, -25 - e * 7); x.rotate(P.brow || 0); part(x, rect(-14, -2.5, 28, 5, 2), C.hair, { rim: 1 }); x.restore();
+  const mo = P.mouth || 0; if (mo > 0) hole(x, ell(51, 33, 5 + mo * 6, 1.5 + mo * 8, -.2));
 }
 // (hx,hy) = hip in design coords; sc scale; dir +1 faces right. P: lean, head, hflip, armF/armB/legF/legB = [a1,a2] (0 = hanging down, + = forward)
 function person(x, hx, hy, sc, dir, C, P, s) {
@@ -34,11 +35,11 @@ function person(x, hx, hy, sc, dir, C, P, s) {
   const shoe = y => part(y, SHOE, C.shoe);
   const dk = (c, k = .72) => shade(c, k);
   if (!P.bust) { limb(0, 0, P.legB || [0, 0], 122, 120, 44, dk(C.pants), dk(C.pants), shoe); }
-  x.save(); x.rotate(-(P.lean || 0));
+  x.save(); x.rotate(P.lean || 0);
   limb(4, -176, P.armB || [0, 0], 96, 90, 34, dk(C.shirt), dk(C.shirt), hand(P.holdB));
   x.restore();
   if (!P.bust) limb(0, 0, P.legF || [0, 0], 122, 120, 46, C.pants, C.pants, shoe);
-  x.save(); x.rotate(-(P.lean || 0));
+  x.save(); x.rotate(P.lean || 0);
   part(x, TORSO, C.shirt);
   if (C.bag) { x.save(); x.translate(0, -100); x.rotate(.42); part(x, rect(-7, -120, 14, 240, 4), C.bag, { rim: 2 }); x.restore(); part(x, rect(-34, -40, 62, 58, 10), C.bag); }
   part(x, rect(-14, -232, 30, 46, 8), shade(C.skin, .82));

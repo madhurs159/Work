@@ -18,7 +18,7 @@ const DK={l:1,f:1};
 const _line=line,_fill=fill;
 line=(L,pts,o={})=>_line(L,pts,DK.l<1?{...o,draw:(o.draw??1)*DK.l}:o);
 fill=(L,poly,o={})=>_fill(L,poly,DK.f<1?{...o,draw:(o.draw??1)*DK.f}:o);
-const BF=layer(),BL=layer(),WX=layer(),WS=layer(),CH=group(),G2=group(),CK=layer(),CT=layer();
+const BF=layer(),BL=layer(),WX=layer(),WS=layer(),WS2=layer(),CH=group(),G2=group(),CK=layer(),CT=layer();
 const LW=7.5,EX=-2600,AR=890,ROWS=[250,570,890,1210];
 let T=null,S=[],CHK=[];
 const X=x=>EX+x;
@@ -53,7 +53,7 @@ function T0(o){const k=o.flip?-1:1;return pts=>xf(pts,{x:o.x||0,y:o.y||0,s:o.s||
 // head: local origin = face centre, faces +x. turn -1..1 shifts the features; back = back of the head
 function head(C,o){const P=T0(o),sd=o.seed||100,k=o.kind,Sc=o.s||1;
   const tx=(o.turn??.6)*15,ty=(o.up||0)*-9;
-  const skinF={col:CR.skin,p:.58,gap:9,w:12,ang:.5,seed:sd+2,over:3};
+  const skinF={col:CR.skin,p:.66,gap:9,w:12,ang:.5,seed:sd+2,over:3};
   const hairF={col:CR.brown,p:.92,gap:7,w:10,ang:1.2,seed:sd+1,over:2.5,cross:true,crossP:.5};
   const dot=(x,y,r,col,s,p=.98)=>dab(C.l,...P([[x,y]])[0],r*Sc,{col,p,seed:sd+s,gap:3,w:4.5,over:.4});
   if(o.back){
@@ -118,9 +118,9 @@ function head(C,o){const P=T0(o),sd=o.seed||100,k=o.kind,Sc=o.s||1;
   else if(m==='grin'){hole(C,P(smooth([[mx-27,my-8],[mx,my-2],[mx+27,my-8],[mx+19,my+10],[mx,my+15],[mx-19,my+10]],4)),lo(sd+45,{w:5}));for(const d of[-12,0,12])line(C.l,P([[mx+d,my-3],[mx+d*.9,my+11]]),lo(sd+47+d,{w:3,p:.7}))}
   if(o.sweat){const s=tx>=0?-1:1;[[s*58,-36,1],[s*72,-8,.8]].forEach(([x,y,q],i)=>part(C,P(smooth([[x,y-12*q],[x+7*q,y+3*q],[x,y+10*q],[x-7*q,y+3*q]],4)),{col:CR.blue,p:.9,gap:3.5,w:5,seed:sd+70+i,over:.5},lo(sd+72+i,{w:3.5})))}
 }
-const KIND={arj:{top:CR.blue,leg:CR.ink,legP:.5,shoe:CR.brown},old:{top:CR.violet,leg:CR.violet,legP:.88,shoe:CR.brown},con:{top:CR.ochre,leg:CR.brown,legP:.7,shoe:CR.ink}};
+const KIND={arj:{top:CR.blue,leg:CR.ink,legP:.64,shoe:CR.brown},old:{top:CR.violet,leg:CR.violet,legP:.88,shoe:CR.brown},con:{top:CR.ochre,leg:CR.brown,legP:.86,shoe:CR.brown}};
 function limb(C,P,pts,w0,w1,fo,sd){part(C,P(tube(curve(pts,5),w0,w1)),fo,lo(sd))}
-function mitt(C,P,x,y,sd){part(C,P(ellipse(x,y,15,14,18)),{col:CR.skin,p:.58,gap:8,w:10,seed:sd,over:2},lo(sd+1,{w:6}))}
+function mitt(C,P,x,y,sd){part(C,P(ellipse(x,y,15,14,18)),{col:CR.skin,p:.66,gap:8,w:10,seed:sd,over:2},lo(sd+1,{w:6}))}
 function note(C,P,x,y,sd){part(C,P(xf(rect(-22,-13,22,13),{x,y,r:-.25})),{col:CR.green,p:.95,gap:4,w:6,seed:sd,over:1},lo(sd+1,{w:5}));line(C.l,P(ellipse(x,y,5,5,10)),lo(sd+2,{w:3}))}
 // seated side view; (x,y) = hip on the cushion
 function seated(C,o){const P=T0(o),K=KIND[o.kind],sd=o.seed,Pu=pts=>P(xf(pts,{r:o.lean||0}));
@@ -156,18 +156,18 @@ function house(x,w,h,sd,roof=1){const y=1000;
   const nx=Math.max(1,Math.round(w/110)),ny=Math.max(1,Math.floor((h-80)/120));
   for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){if(hash(sd+i*7+j*3)<.25)continue;const wx=x+(i+.5)*w/nx-24,wy=y-h+34+j*120;bgp(rect(wx,wy,wx+48,wy+58),{col:CR.yellow,p:.97,gap:4,w:7,seed:sd+9+i+j*5,over:1},{w:5,seed:sd+30+i+j*5})}}
 function lamp(x,sd){bl(curve([[x,1002],[x,470],[x+6,428],[x+30,414],[x+62,414]],6),{seed:sd,w:8});
-  fill(BF,ellipse(x+66,446,84,84,24),{col:CR.yellow,p:.34,gap:10,w:11,ang:.8,seed:sd+1,boil:0,over:6});
+  for(let k=0;k<9;k++){const a=k/9*6.283+.3;bl([[x+66+Math.cos(a)*38,432+Math.sin(a)*32],[x+66+Math.cos(a)*(62+hash(sd+k)*16),432+Math.sin(a)*(54+hash(sd+k)*14)]],{col:CR.yellow,w:6,p:1,seed:sd+10+k,boil:1})}
   bgp(ellipse(x+66,432,24,17,18),{col:CR.yellow,p:1,gap:3.5,w:6,seed:sd+2,over:1},{w:5,seed:sd+3})}
 function stopSign(x){bl([[x,1002],[x,652]],{seed:71,w:8});
   bgp(rrect(x-108,548,x+108,652,16),{col:CR.yellow,p:.97,gap:6,w:9,ang:.3,seed:72,cross:true},{seed:73});
   wtext(BL,'बस स्टॉप',x,620,{size:50,seed:74,reveal:DK.l})}
 function homeSign(x){bl([[x,1002],[x,412]],{seed:81,w:8});
-  bgp(rrect(x-128,300,x+128,412,14),{col:CR.yellow,p:.97,gap:6,w:9,ang:.3,seed:82,cross:true},{seed:83});
+  bgp(rrect(x-160,300,x+128,412,14),{col:CR.yellow,p:.97,gap:6,w:9,ang:.3,seed:82,cross:true},{seed:83});
   wtext(BL,'घर 3 km',x+22,378,{size:52,seed:84});
-  bl([[x-74,356],[x-116,356]],{w:6,seed:85});bl([[x-100,342],[x-116,356],[x-100,370]],{w:6,seed:86})}
+  bl([[x-92,356],[x-140,356]],{w:6,seed:85});bl([[x-124,342],[x-140,356],[x-124,370]],{w:6,seed:86})}
 // bus seen from outside, front = left end at x
 function busParts(x,bob){const y0=566+bob,yb=952+bob;return{y0,yb,
-  body:smooth([[x+26,y0],[x+790,y0],[x+822,y0+34],[x+824,yb],[x,yb],[x-2,y0+150],[x+8,y0+46]],5),
+  body:[...rrect(x+18,y0,x+824,yb,44,6).slice(0,21),[x+2,yb-40],[x-4,y0+190],[x+6,y0+70],[x+24,y0+16],[x+60,y0]],
   wins:[0,1,2,3].map(i=>rrect(x+160+i*165,y0+52,x+292+i*165,y0+208,16)),
   door:rrect(x+46,y0+70,x+130,yb-14,12),wheels:[x+190,x+655]}}
 function busExt(x,o={}){const B=busParts(x,o.bob||0),{y0,yb}=B,C=CH,rot=o.rot||0;
@@ -180,7 +180,7 @@ function busExt(x,o={}){const B=busParts(x,o.bob||0),{y0,yb}=B,C=CH,rot=o.rot||0
     gl(curve([[cx-18,cy+20],[cx-8,cy+14],[cx+2,cy+20]]),{seed:418,w:4});
     for(let k=0;k<3;k++)gl([[x+850+k*26,y0+90+k*120],[x+960+k*40+hash(k+BOIL.step)*20,y0+90+k*120]],{seed:420+k,w:6});
     return}
-  if(o.beam)fill(C.f,[[x-2,yb-86],[x-300,yb-130],[x-320,1000],[x-2,yb-50]],{col:CR.yellow,p:.3,gap:10,w:11,ang:.15,seed:30,over:4,boil:.5});
+  if(o.beam)[[-250,-118],[-290,-66],[-250,-14]].forEach(([dx,dy],k)=>line(C.l,[[x-22,yb-68+dy*.25],[x+dx,yb-68+dy]],{col:CR.yellow,w:7,p:1,seed:26+k,boil:1}));
   part(C,B.body,{col:CR.red,p:.93,gap:8,w:11,ang:.5,seed:31,over:5,cross:true,crossP:.6,boil:.4},lo(32,{w:8.5}));
   part(C,rect(x+134,yb-128,x+822,yb-96),{col:CR.yellow,p:.95,gap:5,w:8,ang:.05,seed:33,over:1,boil:.4},lo(34,{w:5}));
   B.wins.forEach((w,i)=>part(C,w,{col:CR.yellow,p:.36,gap:9,w:10,ang:.7,seed:35+i,over:1,boil:.4},lo(40+i,{w:6.5})));
@@ -203,33 +203,33 @@ function sky(){ // white wax: invisible until the ultramarine wash crosses it
   if(v0<X(1100)){fill(WX,ellipse(X(850),60,74,74,40),{col:CR.white,p:1,gap:5,w:9,ang:.6,seed:590,cross:true,boil:.3,over:1});
     line(WX,handCircle(X(850),60,75,4),{col:CR.white,p:1,w:8,seed:591});
     wtext(WX,'11:40 PM',X(430),128,{size:150,col:CR.white,seed:592,stroke:5,reveal:seg(TQ,.1,.9)})}}
-let TQ=0;
+let TQ=0,TT=0;
 function exterior(t,tq,i){const end=i>=6;
   const sc=end?300*(tq-S[7]):0,wrap=b=>((b+sc)%2200+2200)%2200-500;
   if(!end){DK.l=seg(t,-.06,.62);DK.f=seg(t,.15,.9)}
   bl([[X(-900),1004],[X(2000),1004]],{seed:90,w:7.5});
   if(end){for(let k=0;k<6;k++){const x=X(((k*380+sc*1.25)%2280+2280)%2280-500);bl([[x,1082],[x+120,1082]],{seed:91+k,w:6,p:.7,boil:1})}
-    lamp(X(wrap(200)),100);lamp(X(wrap(1300)),110);house(X(wrap(760)),190,210,120);house(X(wrap(1560)),230,330,140,0);homeSign(X(wrap(1839)))}
-  else{house(X(455),200,220,120);house(X(700),250,560,140,0);lamp(X(968),100);stopSign(X(150));
+    lamp(X(wrap(200)),100);lamp(X(wrap(1300)),110);house(X(wrap(760)),190,210,120);house(X(wrap(1560)),170,180,140);homeSign(X(wrap(1839)))}
+  else{lamp(X(905),100);stopSign(X(124));
     bl([[X(40),1082],[X(1040),1082]],{seed:92,w:5,p:.5})}
   DK.l=DK.f=1;
   const bob=(BOIL.step%4<2?0:2.5);
-  if(!end){const bx=lerp(1560,372,eo(seg(tq,1.25,2.85))),mv=tq<2.85;
-    busExt(X(bx),{bob:mv?bob:0,rot:-bx/60,beam:true,pass:tq>=3.85?{turn:.3,eyes:'dot',mouth:'smile'}:null});
+  if(!end){const bx=lerp(1620,436,eo(seg(tq,1.25,2.85))),mv=tq<2.85;
+    busExt(X(bx),{bob:mv?bob:0,rot:-bx/60,beam:mv,pass:tq>=3.85?{turn:.3,eyes:'dot',mouth:'smile'}:null});
     DK.l=seg(t,.05,.7);DK.f=seg(t,.2,.9);
     if(tq<3.25){const hail=tq>1.5&&tq<2.9,alt=BOIL.step%6<3;
-      standing(CH,{kind:'arj',x:X(292),y:1000,s:1.22,seed:300,pack:true,head:{turn:.9,eyes:'dot',lx:1,mouth:tq>1.5?'smile':'flat'},
+      standing(CH,{kind:'arj',x:X(318),y:1000,s:1.22,seed:300,pack:true,head:{turn:.9,eyes:'dot',lx:1,mouth:tq>1.5?'smile':'flat'},
         armN:hail?(alt?[[34,-112],[40,-166]]:[[40,-110],[58,-160]]):undefined})}
-    else if(tq<3.85)standing(CH,{kind:'arj',x:X(438),y:984,s:1.1,seed:300,pack:true,walk:1,head:{turn:.9,eyes:'dot',mouth:'smile'},armN:[[30,-70],[56,-96]]});
+    else if(tq<3.85)standing(CH,{kind:'arj',x:X(506),y:984,s:1.1,seed:300,pack:true,walk:1,head:{turn:.9,eyes:'dot',mouth:'smile'},armN:[[30,-70],[56,-96]]});
     DK.l=DK.f=1}
   else{const tg=CHK[7][1].s+(CHK[7][1].e-CHK[7][1].s)*.5;
     busExt(X(150),{bob,rot:-tq*7,ghost:tq>=tg,beam:true,pass:{turn:.5,eyes:'dot',brow:'worry',mouth:'sad'}})}
   // end card, hand-lettered on the bare paper below the road
   const vo=T.lines[7].end;if(t>vo+.2){
-    wtext(G2.l,'कहानी कैसी लगी?',X(540),1420,{size:104,seed:900,reveal:seg(tq,vo+.5,vo+1.25)});
-    wtext(G2.l,'फ़ॉलो करें',X(540),1640,{size:128,col:CR.red,seed:901,stroke:3,reveal:seg(tq,vo+1.3,vo+1.8)});
-    line(G2.l,curve([[X(330),1700],[X(450),1716],[X(600),1696],[X(760),1712]],6),{col:CR.red,w:9,p:.95,seed:902,draw:seg(tq,vo+1.75,vo+2.1)});
-    line(G2.l,curve([[X(380),1736],[X(540),1746],[X(720),1734]],6),{col:CR.yellow,w:8,p:.95,seed:903,draw:seg(tq,vo+1.95,vo+2.3)})}}
+    wtext(G2.l,'कहानी कैसी लगी?',X(540),1530,{size:104,seed:900,reveal:seg(tq,vo+.5,vo+1.25)});
+    wtext(G2.l,'फ़ॉलो करें',X(540),1750,{size:128,col:CR.red,seed:901,stroke:3,reveal:seg(tq,vo+1.3,vo+1.8)});
+    line(G2.l,curve([[X(330),1810],[X(450),1826],[X(600),1806],[X(760),1822]],6),{col:CR.red,w:9,p:.95,seed:902,draw:seg(tq,vo+1.75,vo+2.1)});
+    line(G2.l,curve([[X(380),1846],[X(540),1856],[X(720),1844]],6),{col:CR.yellow,w:8,p:.95,seed:903,draw:seg(tq,vo+1.95,vo+2.3)})}}
 
 // ================= interior page: the bus as a cutaway =================
 const pane=h=>rrect(h-40,545,h+250,775,26);
@@ -248,14 +248,14 @@ function interiorBG(t,tq,i){
   for(const g of[g1,g2]){g.save();g.beginPath();ROWS.forEach(h=>{pane(h).forEach(([x,y],j)=>j?g.lineTo(sx(x),sy(y)):g.moveTo(sx(x),sy(y)));g.closePath()});g.clip()}
   for(let k=0;k<3;k++){const lx=((k*900-tq*640)%2700+2700)%2700-500;if(i>=5&&lx>AR-80&&lx<AR+290)continue;
     line(BL,[[lx,780],[lx,626]],{col:CR.ink,w:6,p:.9,seed:27+k,boil:1});
-    fill(BF,ellipse(lx,610,46,46,20),{col:CR.yellow,p:.36,gap:8,w:9,seed:30+k,boil:1,over:3});
+    for(let q=0;q<8;q++){const a=q/8*6.283+.2;line(BL,[[lx+Math.cos(a)*26,610+Math.sin(a)*24],[lx+Math.cos(a)*46,610+Math.sin(a)*42]],{col:CR.yellow,w:5,p:1,seed:130+k*9+q,boil:1})}
     fill(BF,ellipse(lx,610,15,13,14),{col:CR.yellow,p:1,gap:3.5,w:6,seed:33+k,boil:1,over:1})}
   g1.restore();g2.restore();
   ROWS.forEach((h,k)=>bl(cl(pane(h)),{seed:40+k,w:7.5}));
   // tube light, handrail and swinging straps
   bgp(rrect(520,509,900,527,8),{col:CR.yellow,p:.97,gap:4,w:7,ang:.05,seed:45,over:1},{w:4.5,seed:46});
   bl([[108,538],[1490,538]],{seed:47,w:6});
-  for(let x=170;x<1480;x+=160){const sw=Math.sin(tq*5.2+x*.7)*11;bl([[x,538],[x+sw,584]],{w:4.5,seed:48+x,boil:1});line(BL,handCircle(x+sw*1.35,602,17,x),{col:CR.orange,w:6.5,p:.95,seed:49+x})}
+  for(let x=170;x<1480;x+=160){if(i>=6&&x>AR-60&&x<AR+270)continue;const sw=Math.sin(tq*5.2+x*.7)*11;bl([[x,538],[x+sw,584]],{w:4.5,seed:48+x,boil:1});line(BL,handCircle(x+sw*1.35,602,17,x),{col:CR.orange,w:6.5,p:.95,seed:49+x})}
   // seats
   ROWS.forEach((h,k)=>{const F={col:CR.green,p:.9,gap:8,w:11,ang:.7,seed:50+k,cross:true,crossP:.55,over:3};
     bgp(smooth([[h-86,930],[h-93,730],[h-82,700],[h-58,700],[h-48,730],[h-46,902]],4),F,{seed:55+k});
@@ -313,37 +313,39 @@ function drawWash(t,i){const g=WS.g;g.fillStyle='#000';g.strokeStyle='#000';
     mv(v0-50,-3000);mv(v1+50,-3000);
     for(let x=v1+50;x>=v0-50;x-=12/s){const low=x<EX+1420+wn(x*3,7)*3?1001:447;mv(x,low+wn(x,3)*.7)}
     g.closePath();g.clip();
-    const NB=11;for(let k=0;k<NB;k++){const yb=-470+k*138,h=172,a0=.3+k*.17,pr=i===0?seg(t,a0,a0+.62):1;if(pr<=0)continue;
+    g.globalCompositeOperation='destination-over';const NB=11;for(let k=0;k<NB;k++){const yb=-470+k*138,h=160,a0=.22+k*.12,pr=i===0?seg(t,a0,a0+.6):1;if(pr<=0)continue;
       let xa=v0-40,xb=v1+40,front=null;if(pr<1){const dir=k%2?-1:1,L0=EX-320,L1=EX+1420;if(dir>0){xa=L0;xb=L0+(L1-L0)*pr;front=xb}else{xb=L1;xa=L1-(L1-L0)*pr;front=xa}}
       if(xb<v0-60||xa>v1+60)continue;xa=Math.max(xa,v0-60);xb=Math.min(xb,v1+60);
       g.beginPath();const st=10/s;let f=true;
       for(let x=xa;x<=xb+st;x+=st){const xx=Math.min(x,xb),[a,b]=P(xx,yb+wn(xx,k));f?g.moveTo(a,b):g.lineTo(a,b);f=false}
       for(let x=xb;x>=xa-st;x-=st){const xx=Math.max(x,xa),[a,b]=P(xx,yb+h+wn(xx,k+50));g.lineTo(a,b)}
-      g.closePath();g.globalAlpha=.8;g.fill();
-      g.globalAlpha=.1;g.lineWidth=3*s;for(let q=0;q<4;q++){g.beginPath();f=true;for(let x=xa;x<=xb;x+=30/s){const[a,b]=P(x,yb+h*(.16+.22*q)+wn(x,k+q*9)*1.2);f?g.moveTo(a,b):g.lineTo(a,b);f=false}g.stroke()}
-      if(front!==null){const d=k%2?1:-1;for(let q=0;q<5;q++){g.globalAlpha=.12;const w=(52-q*10)/1;g.beginPath();g.rect(...P(Math.min(front,front+d*w),yb+6),Math.abs(w)*s,(h-12)*s);g.fill()}}}
+      g.closePath();g.globalAlpha=.88;g.fill();g.globalCompositeOperation='source-over';
+      g.globalAlpha=.07;g.lineWidth=3*s;for(let q=0;q<5;q++){g.beginPath();f=true;for(let x=xa;x<=xb;x+=30/s){const[a,b]=P(x,yb+h*(.1+.2*q)+wn(x,k+q*9)*1.2);f?g.moveTo(a,b):g.lineTo(a,b);f=false}g.stroke()}
+      if(front!==null){const d=k%2?1:-1;for(let q=0;q<5;q++){g.globalAlpha=.12;const w=(52-q*10)/1;g.beginPath();g.rect(...P(Math.min(front,front+d*w),yb+6),Math.abs(w)*s,(h-12)*s);g.fill()}}
+      g.globalCompositeOperation='destination-over'}
+    g.globalCompositeOperation='source-over';
     g.restore();g.globalAlpha=1}
   // window panes
   if(v1>-100)ROWS.forEach((h,k)=>{if(h+260<v0||h-50>v1)return;const p=pane(h);g.save();g.beginPath();p.forEach(([x,y],j)=>{const[a,b]=P(x,y);j?g.lineTo(a,b):g.moveTo(a,b)});g.closePath();g.clip();
     const pr=seg(t,S[1]+.25+k*.05,S[1]+.8+k*.05);
-    g.globalAlpha=.8;g.beginPath();g.rect(...P(h-50,540),300*s*pr,245*s);g.fill();
+    g.globalAlpha=.88;g.beginPath();g.rect(...P(h-50,540),300*s*pr,245*s);g.fill();
     g.globalAlpha=.1;g.lineWidth=3*s;for(let q=0;q<5;q++){g.beginPath();g.moveTo(...P(h-50,575+q*44+wn(h,q)));g.lineTo(...P(h-50+300*pr,580+q*44+wn(h+300,q)));g.stroke()}
-    if(k===2&&t>=T.lines[6].start){ // the second, heavy coat: the brush crosses the glass and the white wax answers
-      const q=seg(t,T.lines[6].start,T.lines[6].start+.5),fx=h-50+310*q;
-      g.globalAlpha=.9;g.beginPath();let f=true;for(let y=540;y<=790;y+=8){const[a,b]=P(fx+wn(y*4,2)*1.2,y);f?g.moveTo(a,b):g.lineTo(a,b);f=false}g.lineTo(...P(h-60,790));g.lineTo(...P(h-60,540));g.closePath();g.fill();
-      if(q<1)for(let m=0;m<5;m++){g.globalAlpha=.16;g.beginPath();g.rect(...P(fx-(34-m*6),540),(34-m*6)*s,250*s);g.fill()}}
     g.restore();g.globalAlpha=1})}
+// the second, heavy coat of the same ultramarine: the brush crosses Arjun's window and the white wax answers
+function coat2(t){const g=WS2.g,h=AR,s=CAM.s,P=(x,y)=>[sx(x),sy(y)],wn=y=>(vnoise(y/9)-.5)*12;g.fillStyle='#000';
+  const q=seg(t,T.lines[6].start,T.lines[6].start+.5),fx=h-50+320*q;
+  g.save();g.beginPath();pane(h).forEach(([x,y],j)=>{const[a,b]=P(x,y);j?g.lineTo(a,b):g.moveTo(a,b)});g.closePath();g.clip();
+  g.globalAlpha=.92;g.beginPath();let f=true;for(let y=540;y<=790;y+=6){const[a,b]=P(fx+wn(y),y);f?g.moveTo(a,b):g.lineTo(a,b);f=false}g.lineTo(...P(h-60,790));g.lineTo(...P(h-60,540));g.closePath();g.fill();
+  if(q<1)for(let m=0;m<5;m++){g.globalAlpha=.2;g.beginPath();g.rect(...P(fx-(40-m*7),540),(40-m*7)*s,250*s);g.fill()}
+  g.restore();g.globalAlpha=1}
 // white wax in Arjun's window: the reflection of his seat, with nobody in it
 function reflection(){const h=AR,gl=(pts,e={})=>line(WX,pts,{col:CR.white,p:1,w:9,seed:800,boil:.9,...e});
   const g=WX.g;g.save();g.beginPath();pane(h).forEach(([x,y],j)=>j?g.lineTo(sx(x),sy(y)):g.moveTo(sx(x),sy(y)));g.closePath();g.clip();
-  const x=h+128;
-  gl(cl(smooth([[x-52,790],[x-58,634],[x-46,606],[x-18,604],[x-6,630],[x-4,748]],4)),{seed:801});
-  gl(cl(smooth([[x-56,744],[x+86,742],[x+100,760],[x+86,790],[x-56,790]],3)),{seed:802});
-  gl(curve([[x-40,640],[x-34,690],[x-36,730]]),{seed:803,w:5});
-  gl([[h-40,574],[h+250,572]],{seed:804,w:6});
-  for(const d of[-58,96]){gl([[x+d,573],[x+d+4,604]],{seed:805+d,w:5});gl(handCircle(x+d+5,618,13,d),{seed:806+d,w:6})}
-  // little sparkle marks around the empty place
-  for(let k=0;k<3;k++){const a=-1.2+k*.75,cx=x+34+Math.cos(a)*64,cy=694+Math.sin(a)*58;gl([[cx-7,cy],[cx+7,cy]],{seed:810+k,w:4});gl([[cx,cy-7],[cx,cy+7]],{seed:813+k,w:4})}
+  const fq=seg(TT,T.lines[6].start,T.lines[6].start+.5);g.beginPath();g.rect(sx(h-60),sy(530),(320*fq+6)*CAM.s,270*CAM.s);g.clip();
+  const x=h+152,WF={col:CR.white,p:.92,gap:6,w:8,ang:.7,boil:.6,over:1};
+  const back=smooth([[x-70,764],[x-76,612],[x-66,588],[x-44,588],[x-36,612],[x-34,742]],4),cush=smooth([[x-72,738],[x+56,738],[x+68,753],[x+56,769],[x-72,769]],3);
+  fill(WX,back,{...WF,seed:820});gl(cl(back),{seed:801,w:8});fill(WX,cush,{...WF,seed:821,ang:.2});gl(cl(cush),{seed:802,w:8});
+  for(let k=0;k<4;k++){const a=-2.3+k*.72,cx=x+14+Math.cos(a)*62,cy=690+Math.sin(a)*66,l=k%2?9:6;gl([[cx-l,cy],[cx+l,cy]],{seed:810+k,w:4});gl([[cx,cy-l],[cx,cy+l]],{seed:814+k,w:4})}
   g.restore()}
 
 // ================= printed words =================
@@ -363,7 +365,7 @@ function pose(i,lt,d){const p=lt/d;
   if(i===0)return[X(540)-16*p,660,1+.06*p];
   if(i===1)return[lerp(1010,560,eio(seg(lt,.8,4.5))),765,1.15];
   if(i===2)return[lerp(880,770,eio(seg(lt,.8,5.2))),753,1.5];
-  if(i===3)return[722,762,lerp(1.72,1.82,p)];
+  if(i===3)return[lerp(702,710,p),758,lerp(1.5,1.56,p)];
   if(i===4)return[262,782,lerp(2.9,3.3,eo(p*.9))];
   if(i===5){const k=eio(seg(lt,CHK[5][1].s-S[5]-.1,CHK[5][1].s-S[5]+.8));return[lerp(AR-4,AR+62,k),lerp(772,716,k),lerp(2.8,3.0,k)]}
   if(i===6)return[AR+82,694,3.2+.12*p];
@@ -374,18 +376,18 @@ function camera(t,i){const lt=t-S[i],d=S[i+1]-S[i];let c=pose(i,lt,d);const bd=i
   CAM.x=c[0];CAM.y=c[1];CAM.s=c[2]}
 
 window.render=function(t){
-  const st=Math.floor(t*15+1e-6),tq=st/15;BOIL.step=st;TQ=tq;
+  const st=Math.floor(t*15+1e-6),tq=st/15;BOIL.step=st;TQ=tq;TT=t;
   let i=0;for(let k=0;k<8;k++)if(t>=S[k])i=k;
   camera(t,i);comp.paperCam(CAM.x,CAM.y,CAM.s);
   // boil: full normally, calmer when the film goes quiet, a jolt on the sting
   let amp=1;if(i===3&&tq>=CHK[3][3].s)amp=.5;if(i===4&&tq>=CHK[4][3].s+.6)amp=.55;if(i===6){const q=t-T.lines[6].start;amp=q>=0&&q<.6?2.2:.8}if(i===7&&t>CHK[7][1].e)amp=.6;BOIL.amp=amp;
-  for(const L of[BF,BL,WX,WS,CK,CT])clear(L);clearGroup(CH);clearGroup(G2);
+  for(const L of[BF,BL,WX,WS,WS2,CK,CT])clear(L);clearGroup(CH);clearGroup(G2);
   const v0=CAM.x-560/CAM.s,v1=CAM.x+560/CAM.s,visE=v0<EX+1700,visI=v1>-200;
   sky();
   if(visE)exterior(t,tq,i);
   if(visI){interiorBG(t,tq,i);interiorChars(t,tq,i);if(i===6||(i===7&&t<S[7]+.5))reflection()}
-  drawWash(t,i);caption(t);
-  comp.begin(PAPER);comp.crayon(BF.c);comp.crayon(BL.c);comp.crayon(WX.c);comp.wash(WS.c,{color:WASHC});
+  drawWash(t,i);const c2=visI&&t>=T.lines[6].start;if(c2)coat2(t);caption(t);
+  comp.begin(PAPER);comp.crayon(BF.c);comp.crayon(BL.c);comp.crayon(WX.c);comp.wash(WS.c,{color:WASHC});if(c2)comp.wash(WS2.c,{color:[.36,.4,.64],edge:1.2});
   comp.group(CH);comp.group(G2);comp.knock(CK.c,PAPER);comp.crayon(CT.c);comp.finish({vig:.3,emb:.55})};
 window.init=async function(tm){T=tm;S=T.lines.map((L,k)=>k?L.start-.3:0);S.push(T.total);CHK=T.lines.map(chunks);
   await document.fonts.load('700 60px Kalam','कहानी फ़ॉलो 11:40 PM km');await document.fonts.ready;return true};

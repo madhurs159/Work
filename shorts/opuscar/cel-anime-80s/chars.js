@@ -270,11 +270,13 @@ function head(g, P, o = {}) {
   const rim = o.rim, lx = o.light?.[0] ?? -1, ly = o.light?.[1] ?? -.8, SO = k => [lx * k, ly * k];
   const hairSt = { f: P.hair.f, s: P.hair.s, h: P.hair.h, l: P.hair.l, lw: LH, rim };
   if (kind === 'old') cel(g, HOOD[view].back, { f: P.sari.s, s: mix(P.sari.s, P.sari.l, .5), so: SO(16), l: P.sari.l, lw: LW });
-  else cel(g, Hh.back.map(([x, y]) => [view === 'side' ? x : x * (y > 0 ? .8 : .9), Math.min(y, view === 'side' ? 40 : 44)]), { ...hairSt, f: P.hair.s, so: SO(10), s: mix(P.hair.s, '#000000', .25) });
+  else cel(g, Hh.back.map(([x, y]) => [view === 'side' ? (x < -30 ? x * .82 : x) : view === 'q' ? (x < 0 ? x * .84 : x * .7) : x * (y > 0 ? .78 : .86), Math.min(y, view === 'side' ? 40 : 34)]), { ...hairSt, f: P.hair.s, so: SO(10), s: mix(P.hair.s, '#000000', .25) });
   if (o.body !== false) bodyK(g, P, view, E, kind);
-  cel(g, poly(kind === 'cond' && view === 'side' ? [[-24, 56], [22, 100], [20, 142], [-54, 142]] : V.neck), { f: P.skin.f, s: P.skin.s, l: P.skin.l, lw: LS, sh: [V.chinShadow] });
+  const FL = on => { if (!o.flipHead) return; if (on) { g.save(); g.scale(-1, 1); g.translate(o.flipHead, 0); } else g.restore(); };
+  FL(1); cel(g, poly(kind === 'cond' && view === 'side' ? [[-24, 56], [22, 100], [20, 142], [-54, 142]] : V.neck), { f: P.skin.f, s: P.skin.s, l: P.skin.l, lw: LS, sh: [V.chinShadow] }); FL(0);
   if (o.body !== false && kind !== 'old') collarK(g, P, view, E, kind);
-  const extra = kind === 'old' && HOLLOW[view] ? [HOLLOW[view]] : [];
+  FL(1);
+  const extra = [];
   cel(g, V.face, { f: P.skin.f, s: P.skin.s, l: P.skin.l, lw: LS, h: P.skin.h, sh: (o.light ? [] : [V.farShade]).concat(extra), so: o.light ? SO(12) : null,
     rim: o.skinRim ? { c: o.skinRim, d: [-lx * 2.5, -ly * 2] } : null,
     clipFn: gg => {
@@ -319,6 +321,7 @@ function head(g, P, o = {}) {
   if (kind === 'arjun') for (const b of V.brows) brow(g, P, b[0], b[1], b[2], b[3], E.brow || [0, 0, 2], 1.9);
   if (kind === 'old') for (const b of V.brows) brow(g, P, b[0], b[1] + 4, b[2], b[3] + 4, E.brow || [0, 0, 2], 1.1, P.hair.s);
   if (E.sweat) { const sx = view === 'side' ? 40 : view === 'q' ? -50 : -62; cel(g, [[sx, -6, 1], [sx + 7, 10], [sx, 16], [sx - 7, 10]], { f: '#e8f8ff', l: '#4a6a98', lw: LS, h: '#ffffff', hi: [[[sx - 3, 8], [sx - 1, 4], [sx - 4, 12]]] }); }
+  FL(0);
 }
 function bodyK(g, P, view, E, kind) {
   const dx = view === 'front' ? 0 : view === 'q' ? -14 : -34, dy = E.shoulders || 0, B = 700;
@@ -344,10 +347,12 @@ function collarK(g, P, view, E, kind) {
 // back of the head (Arjun seen from behind) + shoulders
 function backHead(g, P, o = {}) {
   const lx = -1, ly = -.8, SO = k => [lx * k, ly * k];
+  g.save(); g.translate(0, -34);
   if (o.body !== false) bodyK(g, P, 'front', {}, 'arjun');
-  cel(g, poly([[-28, 40], [28, 40], [32, 140], [-32, 140]]), { f: P.skin.f, s: P.skin.s, so: [-10, 0], l: P.skin.l, lw: LS });
+  cel(g, poly([[-34, 60], [34, 60], [38, 140], [-38, 140]]), { f: P.skin.f, s: P.skin.s, so: [-12, 0], l: P.skin.l, lw: LS });
   if (o.body !== false) cel(g, [[-64, 146], [-40, 122], [40, 122], [62, 146], [40, 162], [-40, 162]], { f: P.jacket.f, s: P.jacket.s, so: [-8, -8], l: P.jacket.l, lw: LW });
-  earK(g, P, -76, 22); g.save(); g.scale(-1, 1); earK(g, P, -76, 22); g.restore();
+  g.restore();
+  earK(g, P, -78, 8); g.save(); g.scale(-1, 1); earK(g, P, -78, 8); g.restore();
   const hs = { f: P.hair.f, s: P.hair.s, h: P.hair.h, l: P.hair.l, lw: LH, rim: o.rim };
   cel(g, [[-78, -8], [-84, -50], [-62, -90], [-22, -108], [24, -106], [62, -88], [82, -48], [78, -6], [72, 34, 1], [56, 20], [48, 62, 1], [30, 40], [16, 70, 1], [0, 44], [-18, 68, 1], [-32, 42], [-50, 60, 1], [-58, 24], [-74, 36, 1]], { ...hs, so: SO(12) });
   for (const [x0, x1, ty, b] of [[-50, -20, 30, -4], [-22, 8, 44, 2], [6, 36, 36, 4], [34, 60, 20, 6]]) line(g, lock(x0, -70, x1, -70, (x0 + x1) / 2 + b, ty, b).slice(1, 4), mix(P.hair.l, P.hair.s, .4), LH * .7);

@@ -13,7 +13,7 @@ float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f);
 float fbm(vec2 p){ float a = .5, s = 0.0; for (int i=0;i<4;i++){ s += a*vn(p); p *= 2.03; a *= .5; } return s; }
 void main(){
   vec2 px = vec2(uv.x, 1.0-uv.y) * res;                 // viewport pixels (y down)
-  vec2 s = cam.xy + (px - ctr) / cam.z * vec2(mir, 1.0);   // world (cloth) coordinates; the frame opening `rect` is in viewport px   // screen coordinates (mir = -1: seen from behind the screen)
+  vec2 s = cam.xy + (px - ctr) / cam.z * vec2(mir, 1.0);   // world (cloth) coordinates; the frame opening rect is in viewport px   // screen coordinates (mir = -1: seen from behind the screen)
   vec4 F = texture(front, uv);
   if (frontOnly > .5) { o = vec4(mix(F.rgb, fadeCol, fade), 1); return; }
   // Heat haze: distortion drifting upward

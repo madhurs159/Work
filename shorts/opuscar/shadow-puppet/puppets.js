@@ -2,7 +2,7 @@
 // Units: figure pieces are in "puppet units" (drawn at a world scale), origin at the piece's joint.
 const HK = 1.2, UA = 54, FA = 50, TH = 68, SHN = 76, SOLE = SHN + 11;
 const JN = { neck: [3, -110], shF: [9, -97], shB: [-5, -99], hipF: [5, 2], hipB: [-6, 2] };
-Object.assign(DYE, { indigo: '#27468c', crim: '#9a1a14', ochre: '#d0931f', jade: '#2b8257', teal: '#1f6a80', glass: '#a8d3c8', dark: '#3a1a0c', khaki: '#c79a52' });
+Object.assign(DYE, { indigo: '#27468c', crim: '#9a1a14', ochre: '#d0931f', jade: '#2b8257', teal: '#1f6a80', glass: '#c4e4de', dark: '#3a1a0c', khaki: '#c79a52' });
 const P4 = (box, fn, seed, ss) => piece(box, fn, { seed, ss });
 const rrp = (q, x, y, w, h, r) => q.roundRect(x, y, w, h, r);
 const circ = (q, x, y, r) => { q.moveTo(x + r, y); q.arc(x, y, r, 0, Math.PI * 2); };
@@ -51,12 +51,11 @@ function buildArjun() {
     fill(g, DYE.ink, q => smooth(q, [[18, -52.5], [10, -56.5], [0, -57], [-6, -54], [0, -54], [10, -53.4], [17.5, -50.4]]));
     ink(g, 1.2, q => { q.moveTo(22.5, -30.6); q.quadraticCurveTo(19.4, -31.6, 20, -28.6); });
     ink(g, 1.4, q => { q.moveTo(17.2, -22); q.lineTo(11, -21.2); });
-    ink(g, 1, q => { q.moveTo(12, -14); q.quadraticCurveTo(8, -12, 4, -15); });
   }, 1);
   F.torso = P4([-32, -118, 34, 16], g => {
     fill(g, DYE.indigo, torsoPath);
     within(g, torsoPath, () => {
-      lattice(g, -30, -92, 32, -4, 12, 3.2);
+      lattice(g, -30, -92, 32, -4, 13, 2.2);
       fill(g, DYE.indigo, q => q.rect(-30, -4, 64, 16)); cutLine(g, 1.6, q => { q.moveTo(-26, 0); q.lineTo(26, 0); });
       fill(g, DYE.indigo, q => q.rect(9, -100, 9, 100)); beadLine(g, 13.5, -92, 13.5, -10, 1.7, 13);
     });
@@ -68,7 +67,7 @@ function buildArjun() {
     fill(g, DYE.ochre, p); within(g, p, () => { for (const y of [-84, -58]) coin(g, -41, y, 7); cutLine(g, 2, q => { q.moveTo(-58, -40); q.lineTo(-18, -40); }); beadLine(g, -52, -30, -26, -30, 1.6, 6); }); ink(g, 2.1, p);
   }, 3);
   const stripes = g => { for (const y of [14, 26, 38]) cutLine(g, 2.2, q => { q.moveTo(-12, y); q.lineTo(12, y); }); };
-  F.ua = upperArm(DYE.teal, 4, stripes); F.fa = foreArm(DYE.teal, 5);
+  F.ua = upperArm(DYE.orange, 4, stripes); F.fa = foreArm(DYE.orange, 5);
   F.th = thigh(DYE.brown, 6); F.sh = shin(DYE.brown, 7);
   F.note = P4([-10, -3, 12, 36], g => { const p = q => poly(q, [[-8, 0], [9, -2], [10, 33], [-7, 34]]); fill(g, DYE.jade, p); coin(g, 1, 16, 5); cutLine(g, 1, q => { q.moveTo(-4, 4); q.lineTo(6, 3.4); q.moveTo(-4, 29); q.lineTo(6, 28.6); }); ink(g, 1.5, p); }, 8);
   return F;
@@ -83,15 +82,15 @@ function buildWoman() {
     const neck = q => poly(q, [[-9, 12], [6, 12], [6, -14], [-8, -16]]); fill(g, DYE.skin, neck); ink(g, 1.5, neck);
     cutLine(g, .8, q => { q.moveTo(-5, -6); q.lineTo(4, -3); q.moveTo(-5, 1); q.lineTo(4, 4); });
     const face = q => poly(q, [[13, -23], [17.5, -25.5], [17, -29.5], [20, -31], [27.5, -31], [26.5, -36], [21.5, -44], [18.5, -51], [18, -58], [19, -63], [16, -68], [2, -67], [-10, -57], [-13, -40], [-11, -23], [-2, -21], [6, -21.5]]);
-    fill(g, DYE.skin, face);
+    fill(g, DYE.hide2, face);
     within(g, face, () => {
-      cut(g, q => { q.moveTo(17, -46); q.quadraticCurveTo(10, -51.5, 2.5, -46.5); q.quadraticCurveTo(10, -43.4, 17, -46); });   // the eye: a hole of light
+      cut(g, q => { q.moveTo(17.5, -46); q.quadraticCurveTo(10, -53.5, 1.5, -46.5); q.quadraticCurveTo(10, -41.5, 17.5, -46); });   // the eye: a hole of light
       cutTaper(g, [[0, -47], [-5, -50], [-9, -54]], 1.4); cutTaper(g, [[0, -45.5], [-6, -45], [-10, -46]], 1.3); cutTaper(g, [[1, -44], [-4, -40], [-8, -37]], 1.3);
       cutTaper(g, [[15, -61], [7, -63.5], [-2, -61]], 1.5); cutTaper(g, [[16, -57], [8, -59.5], [0, -57.5]], 1.3);
       cutTaper(g, [[19, -33], [12, -31], [8, -25]], 1.6); cutTaper(g, [[14, -41], [8, -38], [3, -40]], 1.2); cutTaper(g, [[3, -33], [-2, -29], [-3, -24]], 1.3);
     });
-    fill(g, DYE.ink, q => smooth(q, [[18.5, -52.5], [11, -56], [2, -55.4], [-3, -52], [3, -52.6], [11, -52.6], [18, -50.6]]));
-    ink(g, 2.1, face);
+    fill(g, DYE.ink, q => smooth(q, [[18.5, -54.5], [11, -58], [2, -57.4], [-3, -54], [3, -54.8], [11, -55], [18, -53]]));
+    ink(g, 2.1, face); ink(g, 1.1, q => { q.moveTo(17.5, -46); q.quadraticCurveTo(10, -53.5, 1.5, -46.5); q.quadraticCurveTo(10, -41.5, 17.5, -46); });
     g.beginPath(); g.arc(15, -64, 2, 0, 7); g.fillStyle = DYE.crim; g.fill();
     const hair = q => poly(q, [[16, -68], [19, -73], [6, -78], [-8, -70], [-14, -52], [-13, -40], [-10, -57], [2, -67]]);
     fill(g, DYE.white, hair); within(g, hair, () => { for (let k = 0; k < 6; k++) cutLine(g, .8, q => { q.moveTo(15 - k * 4, -74 + k); q.quadraticCurveTo(0 - k * 3, -68 + k * 3, -12, -46 + k * 2); }); }); ink(g, 1.4, hair);
@@ -107,7 +106,7 @@ function buildWoman() {
   F.jaw = P4([-22, -18, 34, 44], g => {     // local origin = hinge rivet near the ear (already in HK-scaled units)
     g.scale(HK, HK); g.translate(-JW[0], -JW[1]);
     const p = q => poly(q, [[-10, -32], [-10, -12], [-3, -5], [9, -3.5], [17, -6], [19.5, -12], [16.5, -16.5], [17.5, -20.5], [13, -21.5], [9, -19], [5, -21], [1, -19], [-3, -21.5]]);
-    fill(g, DYE.skin, p); cutTaper(g, [[13, -9], [6, -8], [0, -11]], 1.3); cutTaper(g, [[-2, -14], [-6, -18], [-7, -24]], 1.2); ink(g, 1.9, p);
+    fill(g, DYE.hide2, p); cutTaper(g, [[13, -9], [6, -8], [0, -11]], 1.3); cutTaper(g, [[-2, -14], [-6, -18], [-7, -24]], 1.2); ink(g, 1.9, p);
   }, 22);
   F.torso = P4([-34, -118, 36, 16], g => {
     const tp = q => smooth(q, [[-22, 9], [-28, -36], [-27, -80], [-18, -104], [0, -112], [14, -106], [22, -88], [26, -56], [27, -22], [24, 9]]);
@@ -126,7 +125,7 @@ function buildWoman() {
     ink(g, 2.3, p);
     const foot = q => smooth(q, [[52, SOLE - 9], [68, SOLE - 10], [84, SOLE - 3], [94, SOLE + 2], [52, SOLE + 2]]); fill(g, DYE.ink, foot);
   }, 25);
-  F.ua = upperArm(DYE.jade, 26, g => { beadLine(g, -8, UA - 8, 8, UA - 8, 1.7, 5); cutLine(g, 1.6, q => { q.moveTo(-11, UA - 15); q.lineTo(11, UA - 15); }); });
+  F.ua = upperArm(DYE.ochre, 26, g => { beadLine(g, -8, UA - 8, 8, UA - 8, 1.7, 5); cutLine(g, 1.6, q => { q.moveTo(-11, UA - 15); q.lineTo(11, UA - 15); }); });
   F.fa = foreArm(DYE.jade, 27, { bare: true }); F.faF = foreArm(DYE.jade, 28, { bare: true, point: true });
   F.stick = P4([-8, -40, 20, 150], g => { ink(g, 5, q => { q.moveTo(14, -24); q.quadraticCurveTo(12, -36, 3, -34); q.quadraticCurveTo(-2, -30, 0, -18); q.lineTo(2, 146); }, DYE.dark); cutLine(g, 1, q => { q.moveTo(.6, 0); q.lineTo(2, 130); }); }, 29);
   F.ear = P4([-7, -2, 7, 20], g => { ink(g, 1.3, q => { q.moveTo(0, 0); q.lineTo(0, 6); }); const r = q => circ(q, 0, 11.5, 5.5); fill(g, DYE.ochre, r); cut(g, q => circ(q, 0, 11.5, 2.6)); ink(g, 1.3, r); }, 30);
@@ -296,7 +295,7 @@ function buildWindow() {
   }, { seed: 81, ss: 2 });
   const glass = piece([0, 0, 520, 660], g => {
     const p = q => rrp(q, 34, 34, 452, 592, 20); fill(g, DYE.glass, p);
-    within(g, p, () => { cutTaper(g, [[300, 60], [380, 150], [450, 260]], 9); cutTaper(g, [[350, 50], [410, 110], [470, 190]], 5); cutTaper(g, [[60, 470], [110, 540], [150, 610]], 6); });
+    within(g, p, () => { cutTaper(g, [[300, 60], [380, 150], [450, 260]], 9); cutTaper(g, [[70, 120], [120, 200], [160, 300]], 7); cutTaper(g, [[110, 90], [150, 150], [180, 215]], 4); cutTaper(g, [[350, 50], [410, 110], [470, 190]], 5); cutTaper(g, [[60, 470], [110, 540], [150, 610]], 6); });
   }, { seed: 82, ss: 2 });
   return { frame, glass };
 }
@@ -321,4 +320,11 @@ function buildPlaque(lines, px, seed, dye) {
     lines.forEach((l, i) => g.fillText(l, 0, (i - (lines.length - 1) / 2) * lh + px * .06)); g.restore();
     ink(g, 3, o);
   }, { seed, ss: 2 });
+}
+function buildPole2() {
+  return piece([-70, -690, 70, 6], g => {
+    ink(g, 9, q => { q.moveTo(0, 0); q.lineTo(0, -660); }, DYE.dark); ink(g, 6, q => { q.moveTo(-56, -610); q.lineTo(56, -610); q.moveTo(-40, -560); q.lineTo(40, -560); }, DYE.dark);
+    for (const x of [-50, 50, -34, 34]) ink(g, 5, q => { q.moveTo(x, x * x > 2000 ? -610 : -560); q.lineTo(x, (x * x > 2000 ? -610 : -560) - 16); }, DYE.dark);
+    const l = q => smooth(q, [[-56, -600], [-44, -596], [-40, -570], [-50, -552], [-62, -570]]); fill(g, DYE.ochre, l); cut(g, q => circ(q, -51, -576, 5)); ink(g, 2, l);
+  }, { seed: 68, ss: 2 });
 }

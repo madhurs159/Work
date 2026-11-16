@@ -114,7 +114,7 @@ function put(s, o = {}) {
   const k = (o.trans ?? 0) * LIT.k * (o.a ?? 1);
   if (k > .004) {   // backlight through the paper: albedo x warm light x gaussian falloff x pulp cloud, masked by the sheet
     sx.setTransform(1, 0, 0, 1, 0, 0); sx.globalCompositeOperation = 'copy';
-    const a = rgb(s.col), c = [0, 1, 2].map(i => Math.min(255, (a[i] * .9 + 26) * LIT.col[i] / 255 * 1.5));
+    const a = rgb(s.col), c = [0, 1, 2].map(i => Math.min(255, (a[i] * .9 + 26) * LIT.col[i] / 255 * 1.0));
     const lx = LIT.x - cam.x * (o.p ?? 1), ly = LIT.y - cam.y * (o.p ?? 1), R = LIT.r * 2.1, gr = sx.createRadialGradient(lx, ly, 0, lx, ly, R), f = LIT.floor;
     for (let i = 0; i <= 8; i++) { const u = i / 8, d = u * R / LIT.r; gr.addColorStop(u, css(c, f + (1 - f) * Math.exp(-d * d))); }
     sx.fillStyle = gr; sx.fillRect(0, 0, W, H);

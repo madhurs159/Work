@@ -1,0 +1,92 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:Tiro;src:url(../../node_modules/@fontsource/tiro-devanagari-hindi/files/tiro-devanagari-hindi-devanagari-400-normal.woff2)}
+@font-face{font-family:Tiro;src:url(../../node_modules/@fontsource/tiro-devanagari-hindi/files/tiro-devanagari-hindi-latin-400-normal.woff2);unicode-range:U+0000-00FF,U+2026}
+html,body{margin:0;background:#000}canvas{display:block}
+</style>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="engine.js"></script>
+<script src="figures.js"></script>
+<script src="scenes.js"></script>
+<script>
+'use strict';
+const out = document.getElementById('c'), og = out.getContext('2d');
+const fin = mk(W, H), fg2 = fin.getContext('2d'), bl1 = mk(270, 480), b1 = bl1.getContext('2d'), bl2 = mk(135, 240), b2 = bl2.getContext('2d');
+let T = null, BND = [], ROOM = null, STRIPS = null;
+function chunks(L) { if (L._c) return L._c; const parts = L.say.split(/(?<=[।,?!])\s*/).filter(Boolean), tot = parts.reduce((a, p) => a + p.length, 0); let s = L.start; return L._c = parts.map(p => { const d = (L.end - L.start) * p.length / tot, o = { s, e: s + d, p: p.replace(/[।,]$/, '') }; s += d; return o; }); }
+CH = id => chunks(T.lines.find(l => l.id === id));
+
+// subtitles: quiet warm off-white serif on the dark front band, fading in just before each phrase
+function caption(x, t) {
+  for (const L of T.lines) {
+    if (t < L.start - .15 || t > L.end + .35) continue;
+    const cs = chunks(L), i = cs.findIndex(c => t < c.e), c = cs[i < 0 ? cs.length - 1 : i], last = c === cs[cs.length - 1];
+    const a = Math.min(prog(t, c.s - .12, .2), last ? 1 - prog(t, L.end + .05, .2) : 1); if (a <= 0) return;
+    x.save(); x.font = '400 72px Tiro'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    let rows = [c.p]; if (x.measureText(c.p).width > 930) { const w = c.p.split(' '), h = Math.ceil(w.length / 2); rows = [w.slice(0, h).join(' '), w.slice(h).join(' ')]; }
+    const cy = 1580, hh = rows.length * 100 + 90, gr = x.createLinearGradient(0, cy - hh / 2, 0, cy + hh / 2);
+    gr.addColorStop(0, 'rgba(2,4,10,0)'); gr.addColorStop(.3, `rgba(2,4,10,${.5 * a})`); gr.addColorStop(.7, `rgba(2,4,10,${.5 * a})`); gr.addColorStop(1, 'rgba(2,4,10,0)'); x.fillStyle = gr; x.fillRect(0, cy - hh / 2, W, hh);
+    x.globalAlpha = a; x.translate(0, 6 * (1 - a));
+    rows.forEach((r, k) => { const y = cy + (k - (rows.length - 1) / 2) * 100; x.shadowColor = 'rgba(0,0,0,.95)'; x.shadowBlur = 18; x.shadowOffsetY = 4; x.lineJoin = 'round'; x.lineWidth = 7; x.strokeStyle = 'rgba(3,5,12,.8)'; x.strokeText(r, W / 2, y); x.shadowBlur = 8; x.fillStyle = '#fff1d6'; x.fillText(r, W / 2, y); });
+    x.restore(); return;
+  }
+}
+// lens: bloom (bright holes burn), vignette
+function post() {
+  b1.setTransform(1, 0, 0, 1, 0, 0); b1.clearRect(0, 0, 270, 480); b1.filter = 'brightness(.74) contrast(3.4) blur(4px)'; b1.drawImage(stage, 0, 0, 270, 480); b1.filter = 'none';
+  b2.clearRect(0, 0, 135, 240); b2.filter = 'blur(7px)'; b2.drawImage(bl1, 0, 0, 135, 240); b2.filter = 'none';
+  fg2.globalCompositeOperation = 'source-over'; fg2.globalAlpha = 1; fg2.drawImage(stage, 0, 0);
+  fg2.globalCompositeOperation = 'lighter'; fg2.imageSmoothingQuality = 'high'; fg2.globalAlpha = .5; fg2.drawImage(bl1, 0, 0, W, H); fg2.globalAlpha = .5; fg2.drawImage(bl2, 0, 0, W, H);
+  fg2.globalCompositeOperation = 'source-over'; fg2.globalAlpha = 1;
+  const v = fg2.createRadialGradient(W / 2, H * .48, 520, W / 2, H * .48, 1250); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,6,.62)'); fg2.fillStyle = v; fg2.fillRect(0, 0, W, H);
+}
+// end card: pull out of the box; the lamp on a table, two paper strips
+function buildRoom() {
+  ROOM = mk(W, H); const x = ROOM.getContext('2d');
+  const gr = x.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#070504'); gr.addColorStop(.74, '#120c08'); gr.addColorStop(.76, '#1d130c'); gr.addColorStop(1, '#0a0705'); x.fillStyle = gr; x.fillRect(0, 0, W, H);
+  x.globalAlpha = .6; x.globalCompositeOperation = 'overlay'; x.fillStyle = GP; x.fillRect(0, 0, W, H); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over';
+  x.strokeStyle = 'rgba(0,0,0,.35)'; x.lineWidth = 2; const R = mulberry(4); for (let i = 0; i < 26; i++) { const y = 1470 + R() * 440; x.beginPath(); x.moveTo(0, y); x.bezierCurveTo(300, y + R() * 16 - 8, 700, y + R() * 16 - 8, W, y + R() * 10 - 5); x.stroke(); }
+  const strip = (txt, w, h, col, tc, size) => sheet({ x: 0, y: 0, w, h, col, rimPx: 2, underPx: 3, draw: s => { rr(s, 0, 0, w, h, 5); s.fill(); cut(s, () => { s.beginPath(); s.arc(26, h / 2, 7, 0, TAU); s.fill(); }); s.fillStyle = tc; s.font = `400 ${size}px Tiro`; s.textAlign = 'center'; s.textBaseline = 'middle'; s.fillText(txt, w / 2 + 10, h / 2 + 4); } });
+  STRIPS = [strip('कहानी कैसी लगी?', 640, 104, '#e6d8b8', '#1a1420', 62), strip('फ़ॉलो करें', 380, 88, '#b83c28', '#f6e6c6', 54)];
+}
+function endCard(t) {
+  const k = eio(prog(t, 37.95, .9)); if (k <= 0) { og.drawImage(fin, 0, 0); return; }
+  const dw = lerp(W, 700, k), dh = dw * H / W, dx = (W - dw) / 2, dy = lerp(0, 168, k), fr = 34 * k + 2;
+  og.drawImage(ROOM, 0, 0);
+  og.save(); og.globalCompositeOperation = 'lighter'; halo(og, 540, dy + dh + 40, 760, [255, 170, 90], .34 * k * flick(t)); halo(og, 540, dy + dh * .5, 900, [120, 140, 255], .1 * k); og.restore();
+  og.save(); og.shadowColor = 'rgba(0,0,0,.8)'; og.shadowBlur = 60 * k; og.shadowOffsetY = 26 * k;
+  const wg = og.createLinearGradient(dx - fr, 0, dx + dw + fr, 0); wg.addColorStop(0, '#3a2414'); wg.addColorStop(.5, '#5a3a20'); wg.addColorStop(1, '#33200f'); og.fillStyle = wg; og.fillRect(dx - fr, dy - fr, dw + 2 * fr, dh + 2 * fr); og.restore();
+  og.save(); og.globalAlpha = .7; og.globalCompositeOperation = 'overlay'; og.fillStyle = GP; og.fillRect(dx - fr, dy - fr, dw + 2 * fr, dh + 2 * fr); og.restore();
+  og.fillStyle = 'rgba(255,220,170,.22)'; og.fillRect(dx - fr, dy - fr, dw + 2 * fr, 3); og.fillStyle = '#000'; og.fillRect(dx - 5, dy - 5, dw + 10, dh + 10);
+  og.drawImage(fin, dx, dy, dw, dh);
+  const ig = og.createLinearGradient(0, dy, 0, dy + 50); ig.addColorStop(0, `rgba(0,0,0,${.55 * k})`); ig.addColorStop(1, 'rgba(0,0,0,0)'); og.fillStyle = ig; og.fillRect(dx, dy, dw, 50);
+  [[0, 38.5, 1512, -.012], [1, 38.85, 1626, .014]].forEach(([i, t0, cy, rot]) => {
+    const s = STRIPS[i], r = eo(prog(t, t0, .5)); if (r <= 0) return; const x0 = 540 - s.w / 2;
+    og.save(); og.translate(540, cy); og.rotate(rot); og.translate(-540, -cy); og.beginPath(); og.rect(x0 - 40, cy - s.h, s.w * r + 40, s.h * 2); og.clip();
+    og.shadowColor = 'rgba(0,0,0,.7)'; og.shadowBlur = 22; og.shadowOffsetY = 12; og.drawImage(s.c, x0, cy - s.h / 2);
+    og.restore();
+  });
+  og.save(); og.globalCompositeOperation = 'multiply'; const sg = og.createRadialGradient(540, 1420, 100, 540, 1420, 620); sg.addColorStop(0, 'rgba(255,214,160,1)'); sg.addColorStop(1, 'rgba(120,84,60,1)'); og.fillStyle = sg; og.fillRect(0, 1440, W, 480); og.restore();
+}
+window.render = function (t) {
+  const L = T.lines; let i = 0; for (let k = 0; k < L.length; k++) if (t >= BND[k]) i = k;
+  const s0 = BND[i], s1 = i < L.length - 1 ? BND[i + 1] : T.total, lt = t - s0, d = s1 - s0, id = L[i].id;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; g.filter = 'none'; g.shadowColor = 'transparent'; g.clearRect(0, 0, W, H);
+  cam.x = cam.y = 0; cam.z = 1; LIT.col = [255, 178, 96]; LIT.floor = .12; LIT.k = 1; LIT.r = 700;
+  g.save(); S[id](lt, d, t); g.restore();
+  // transitions: the light dips off and on between shots; the twist is a hard cut with a flare
+  let dark = t < .5 ? 1 - t / .5 : 0;
+  if (i > 0 && id !== 'mirror') dark = Math.max(dark, 1 - prog(lt, 0, .28));
+  if (i < L.length - 1 && L[i + 1].id !== 'mirror') dark = Math.max(dark, prog(lt, d - .22, .22));
+  if (dark > 0) { g.fillStyle = `rgba(2,3,8,${dark})`; g.fillRect(0, 0, W, H); }
+  if (id === 'mirror') { const f = Math.exp(-lt * 9); g.save(); g.globalCompositeOperation = 'lighter'; g.fillStyle = `rgba(255,214,160,${.3 * f})`; g.fillRect(0, 0, W, H); g.restore(); }
+  post(); og.setTransform(1, 0, 0, 1, 0, 0); og.globalAlpha = 1; og.globalCompositeOperation = 'source-over'; og.shadowColor = 'transparent';
+  endCard(t); caption(og, t);
+};
+window.init = async function (tm) {
+  T = tm; await Promise.all([document.fonts.load('400 50px Tiro', 'रोज़ कहानी'), document.fonts.load('400 50px Tiro', '11:40 PM')]); await document.fonts.ready;
+  BND = T.lines.map((l, k) => k === 0 ? 0 : l.id === 'mirror' ? l.start - .05 : l.start - .3);
+  buildAll(); buildRoom(); return true;
+};
+</script>

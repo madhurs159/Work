@@ -24,27 +24,33 @@ def read_wav(p):
 
 
 # ---- voice ----
-LEAD, GAP, TAIL = (0.35, 0.32, 1.2) if mood == "upbeat" else (0.8, 0.55, 2.6)
-t, timings, clips = LEAD, [], []
-for ln in lines:
-    out = ep / "vo" / f"{ln['id']}.wav"
-    subprocess.run([sys.executable, "-m", "piper", "-m", model, "-f", str(out),
-                    "--length-scale", lscale], input=ln["say"].encode(), check=True,
-                   capture_output=True)
-    x = read_wav(out)
-    nz = np.where(np.abs(x) > 0.01)[0]          # trim silence
-    x = x[max(nz[0] - 800, 0): nz[-1] + 2500]
-    d = len(x) / SR
-    timings.append({**ln, "cap": ln.get("cap", ln["say"]), "start": round(t, 3), "end": round(t + d, 3)})
-    clips.append((t, x))
-    t += d + GAP
-total = t - GAP + TAIL
-N = int(total * SR)
-voice = np.zeros(N, np.float32)
-for st, x in clips:
-    i = int(st * SR)
-    voice[i:i + len(x)] += x[: N - i]
-voice /= max(np.abs(voice).max(), 1e-6)
+PRE = ep / "voice.wav"   # ready-made voice track (e.g. from voice_ov.py): keep the existing timings
+if PRE.exists():
+    _T = json.loads((ep / "timings.json").read_text()); timings, total = _T["lines"], _T["total"]
+    N = int(total * SR); voice = np.zeros(N, np.float32); _v = read_wav(PRE)[:N]; voice[:len(_v)] = _v
+    voice /= max(np.abs(voice).max(), 1e-6)
+else:
+    LEAD, GAP, TAIL = (0.35, 0.32, 1.2) if mood == "upbeat" else (0.8, 0.55, 2.6)
+    t, timings, clips = LEAD, [], []
+    for ln in lines:
+        out = ep / "vo" / f"{ln['id']}.wav"
+        subprocess.run([sys.executable, "-m", "piper", "-m", model, "-f", str(out),
+                        "--length-scale", lscale], input=ln["say"].encode(), check=True,
+                       capture_output=True)
+        x = read_wav(out)
+        nz = np.where(np.abs(x) > 0.01)[0]          # trim silence
+        x = x[max(nz[0] - 800, 0): nz[-1] + 2500]
+        d = len(x) / SR
+        timings.append({**ln, "cap": ln.get("cap", ln["say"]), "start": round(t, 3), "end": round(t + d, 3)})
+        clips.append((t, x))
+        t += d + GAP
+    total = t - GAP + TAIL
+    N = int(total * SR)
+    voice = np.zeros(N, np.float32)
+    for st, x in clips:
+        i = int(st * SR)
+        voice[i:i + len(x)] += x[: N - i]
+    voice /= max(np.abs(voice).max(), 1e-6)
 
 tt = np.arange(N) / SR
 music = np.zeros(N, np.float32)
@@ -130,5 +136,5 @@ mix = np.tanh(mix * 1.1)
 with wave.open(str(ep / "mix.wav"), "w") as w:
     w.setnchannels(1); w.setsampwidth(2); w.setframerate(SR)
     w.writeframes((mix * 32000).astype(np.int16).tobytes())
-(ep / "timings.json").write_text(json.dumps({"total": round(total, 3), "lines": timings}, ensure_ascii=False, indent=1))
+if not PRE.exists(): (ep / "timings.json").write_text(json.dumps({"total": round(total, 3), "lines": timings}, ensure_ascii=False, indent=1))
 print(json.dumps({"total": total, "lines": [(x["id"], x["start"], x["end"]) for x in timings]}))

@@ -21,7 +21,7 @@ const [sc, g] = canvas(W, H), [gc, e] = canvas(W, H), [cc, c] = canvas(W, H), [o
 let POST = null, T = null;
 const RAW = { bloom: 0, halo: 0, soft: 0, flick: 0, lift: 0, contrast: 0, fade: 0, sat: 1, tint: [1, 1, 1], scan: 0, grille: 0, bleed: 1, rshift: 0, glow: 0, corner: 0, noiseA: 0, power: 1, track: 0, expo: 1 };
 
-function chunks(L) { if (L._c) return L._c; const parts = L.say.split(/(?<=[।,?!])\s*/).filter(Boolean), tot = parts.reduce((a, p) => a + p.length, 0); let s = L.start;
+function chunks(L) { if (L._c) return L._c; if (L.ck) return L._c = L.ck.map(c => ({ s: c.s, e: c.e, p: c.p.replace(/[।,]$/, '') })); const parts = L.say.split(/(?<=[।,?!])\s*/).filter(Boolean), tot = parts.reduce((a, p) => a + p.length, 0); let s = L.start;
   return L._c = parts.map(p => { const d = (L.end - L.start) * p.length / tot, o = { s, e: s + d, p: p.replace(/[।,]$/, '') }; s += d; return o; }); }
 // who speaks a chunk (second colour + boxed tag for dialogue)
 const SPEAK = { call: { 1: 'A', 2: 'A' }, woman: { 2: 'O', 3: 'O' } };

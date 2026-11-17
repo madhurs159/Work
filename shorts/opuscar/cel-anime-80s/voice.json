@@ -1,0 +1,15 @@
+{
+ "narrator": {"ref": "voice_samples/narrator_A.wav", "ref_text": "रात के ग्यारह चालीस। अर्जुन ने आख़िरी बस पकड़ी। बस ख़ाली थी।"},
+ "voices": {"arjun": "male, young adult, high pitch", "old": "female, elderly, low pitch, whisper"},
+ "lead": 0.8, "gap": 0.65, "tail": 2.6,
+ "lines": {
+  "stop":   [{"who": "narr", "speed": 0.86, "pause": 0.45}, {"who": "narr", "speed": 0.9}],
+  "inside": [{"who": "narr", "speed": 0.88, "pause": 0.5}, {"who": "narr", "speed": 0.84, "pause": 0.3}, {"who": "narr", "speed": 0.8}],
+  "cond":   [{"who": "narr", "speed": 0.94, "pause": 0.3}, {"who": "narr", "speed": 0.94, "pause": 0.45}, {"who": "narr", "speed": 0.84, "pause": 0.3}, {"who": "narr", "speed": 0.82}],
+  "call":   [{"who": "narr", "speed": 0.94, "pause": 0.3}, {"who": "arjun", "n": 2, "speed": 1.0, "pause": 0.9}, {"who": "narr", "speed": 0.78}],
+  "woman":  [{"who": "narr", "speed": 0.88, "pause": 0.55, "fx": "[laughter]"}, {"who": "narr", "speed": 0.88, "pause": 0.35}, {"who": "old", "n": 2, "speed": 0.8}],
+  "look":   [{"who": "narr", "speed": 0.98, "pause": 0.25}, {"who": "narr", "speed": 0.92}],
+  "mirror": [{"who": "narr", "speed": 0.8, "pause": 0.55}, {"who": "narr", "speed": 0.74}],
+  "end":    [{"who": "narr", "speed": 0.86, "pause": 0.3}, {"who": "narr", "speed": 0.88, "pause": 0.7}, {"who": "narr", "speed": 0.84, "pause": 0.4}, {"who": "narr", "speed": 0.8}]
+ }
+}

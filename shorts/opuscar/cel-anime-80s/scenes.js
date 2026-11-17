@@ -397,8 +397,8 @@ SCENES.cond = S => {
   const a = eo(prog(tc, 1.25, .5)), passed = cx < 330, late = prog(tc, 4.2, .5);
   nearSeat(40, 1130, 330);
   let E, expr;
-  if (!passed) { expr = lt < 1.2 ? 'neutral' : 'smile'; E = { look: [.75, -.55] }; if (lt > 1.7 && lt < 2.9) E.mouth = Math.floor(t8 * 8) % 2 ? 'talk' : 'smile'; }
-  else { expr = 'surprised'; E = { look: [.7, -.5], iris: .88, mouth: late > 0 ? 'closed' : 'oh', brow: late > 0 ? [-7, 3, 2] : [-9, -7, 4.5], open: late > 0 ? 1 : 1.12 }; }
+  if (!passed) { expr = lt < 1.2 ? 'neutral' : 'smileopen'; E = { look: [.75, -.55], brow: [-6, -5, 4.5] }; if (lt >= 1.2) E.mouth = (lt > 1.7 && lt < 2.9) ? (Math.floor(t8 * 8) % 2 ? 'talk' : 'smileopen') : 'smile'; }
+  else { const q = late > 0 ? 2 : cx < 140 ? 1 : 0; expr = q === 0 ? 'surprised' : q === 1 ? 'confused' : 'hurt'; E = { look: [.7, q === 2 ? -.15 : -.5], iris: q ? .85 : .72 }; }
   if (Math.floor(tc * 12) % 41 === 20) E.open = 0;
   c.save(); c.translate(380, 1075); c.scale(2.0, 2.0); head(c, P, { kind: 'arjun', view: 'q', expr, E, flipHead: passed ? 22 : 0 });
   armNote(P, a * (1 - .12 * late), t, passed ? Math.round(Math.sin(tc * 40) * 2) : 0); c.restore();
@@ -419,7 +419,7 @@ SCENES.call = S => {
     uncam();
     const rise = eo(prog(tc, shA - .25, .3)), jx = shout ? Math.round((hash(tc * 12) - .5) * 8) : 0;
     c.save(); c.translate(610 + jx, 1010 - rise * 70); c.scale(-2.9, 2.9);
-    const E = shout ? { mouth: Math.floor(t8 * 8) % 2 ? 'pant' : 'talk', brow: [-6, 4, 2], open: 1.05, look: [.6, -.2] } : lt < shA ? { brow: [-5, 3, 2], look: [.6, -.3], mouth: 'closed' } : { brow: [-8, 5, 2], look: [.6, -.2], mouth: 'talk', open: 1.1, iris: .85 };
+    const E = shout ? { ...EXPR.shout, mouth: Math.floor(t8 * 8) % 2 ? 'scream' : 'pant', look: [.6, -.2] } : lt < shA ? { ...EXPR.hurt, look: [.6, -.3], mouth: 'wavy' } : { ...EXPR.fear, look: [.6 + .12 * Math.sin(tc * 50), -.2], gloom: .5 };
     head(c, P, { kind: 'arjun', view: 'q', expr: 'neutral', E }); armNote(P, .82 + .1 * rise, t, shout ? jx * .3 : 0); c.restore();
     lband(1300 - ((t * 1000) % 2600), 200, '#ffd9a0', .2);
     flush();
@@ -463,7 +463,7 @@ SCENES.woman = S => {
     cam(1 + .06 * k, 540, 900);
     backWall(t, hash(Math.floor(lt * 12) * 1.3) > .12 ? 1 : .5);
     c.save(); c.translate(540, 930 + (fr % 2 ? -10 : 0)); c.scale(2.25, 2.25); c.rotate(fr % 2 ? -.03 : .01);
-    head(c, PO.bus, { kind: 'old', view: 'q', expr: 'smileopen', E: { open: 0, mouth: lt < .25 ? 'smile' : fr % 2 ? 'pant' : 'smileopen', shoulders: fr % 2 ? -12 : 0, brow: [-3, 1, 3] } }); c.restore();
+    head(c, PO.bus, { kind: 'old', view: 'q', expr: 'smileopen', E: { open: 0, mouth: lt < .25 ? 'smile' : fr % 2 ? 'grin' : 'smileopen', shoulders: fr % 2 ? -12 : 0, brow: [-3, 1, 3] } }); c.restore();
     lband(1500 - ((t * 900) % 2600), 200, '#ffd9a0', .18);
     flush(); uncam();
     return { tint: [.96, 1.0, .98], shadowTint: [.06, .12, .2], bloom: .75 };
@@ -473,7 +473,7 @@ SCENES.woman = S => {
   const fl = hash(Math.floor(lt * 12) * 2.9) > .3 ? .45 : .12, hx = 540 - 7 * sc2, hy = 850 - 22 * sc2, op = u < 1 / 8 ? .35 : u < 2 / 8 ? .8 : 1.08;
   cam(sc2 / 2.25 * .62, 540, 760); backWall(t, fl, .5); uncam();
   c.save(); c.translate(hx, hy); c.scale(sc2, sc2); LWK.k = .62;
-  head(c, PO.cold, { kind: 'old', view: 'q', expr: 'smile', light: [-.35, .95], skinRim: '#7fffe0', E: { open: op, smileEyes: false, lid: -.1, iris: .62, look: [.35, .1], brow: [4, -4, 3], mouth: speaking ? ['talk', 'smile', 'smileopen', 'talk'][fr % 4] : 'smile' } }); LWK.k = 1; c.restore();
+  head(c, PO.cold, { kind: 'old', view: 'q', expr: 'smile', light: [-.35, .95], skinRim: '#7fffe0', E: { open: op, smileEyes: false, lid: -.1, iris: .62, look: [.35, .1], brow: [9, -6, 3], mouth: speaking ? ['talk', 'grin', 'smileopen', 'grin'][fr % 4] : 'grin' } }); LWK.k = 1; c.restore();
   lband(1700 - ((t * 700) % 3400), 260, '#35e7ff', .16);
   flush();
   if (u > 2 / 8) for (const [ex, ey, r] of [[-21, 23, 1], [35, 21, .7]]) { airbrush(e, hx + ex * sc2, hy + ey * sc2, 30 * r * sc2 / 4, 30 * r * sc2 / 4, '#bffcff', .95); airbrush(e, hx + ex * sc2, hy + ey * sc2, 110 * r, 110 * r, '#35e7ff', .35); }
@@ -487,7 +487,7 @@ SCENES.look = S => {
     const turn = lt < 1.2 ? 0 : lt < 1.2 + 2 / 12 ? 1 : 2, jx = Math.round((hash(tc * 12 + 3) - .5) * 5), P = turn === 2 ? PA.cold : PA.bus;
     cam(1.5 + .08 * prog(lt, 0, cut), 660, 800); sideInt({ t, sx: 90, flick: hash(Math.floor(lt * 12) * 2.1) > .3 ? 1 : .4 }); uncam();
     c.save(); c.translate(500 + jx + (turn === 2 ? 30 : 0), 1010); c.scale(turn === 0 ? -3.1 : 3.1, 3.1);
-    const E = turn === 0 ? { look: [.5, .1], iris: .74, sweat: true, mouth: 'oh' } : turn === 1 ? { iris: .74, sweat: true, mouth: 'oh' } : { look: [1, 0], iris: .7, sweat: true, mouth: 'pant' };
+    const E = turn === 0 ? { ...EXPR.fear, look: [.5 + .1 * Math.sin(tc * 60), .1], mouth: Math.floor(tc * 6) % 2 ? 'wavy' : 'grit' } : turn === 1 ? { ...EXPR.fear, mouth: 'grit', gloom: .8 } : { ...EXPR.terror, look: [1, 0], mouth: 'grit', tears: true };
     head(c, P, { kind: 'arjun', view: turn === 1 ? 'front' : 'q', expr: 'surprised', E }); c.restore();
     lband(1400 - ((t * 1300) % 2400), 200, turn === 2 ? '#35e7ff' : '#ffd9a0', .2);
     flush();
@@ -496,7 +496,7 @@ SCENES.look = S => {
   const u = lt - cut, k = prog(u, 0, d - cut), sc2 = lerp(8.2, 9.2, k), dr = Math.floor(u * 8), hold = u > d - cut - .5;
   g.fillStyle = PA.cold.hair.s; g.fillRect(0, 0, W, H);
   c.save(); c.translate(540 - 7 * sc2, 880 - 21 * sc2); c.scale(sc2, sc2); LWK.k = .5;
-  head(c, PA.cold, { kind: 'arjun', view: 'q', expr: 'surprised', body: false, reflect: '#8ff4ff', E: { look: [Math.min(1, .2 + dr * .3), 0], iris: Math.max(.56, .8 - dr * .06), open: Math.min(1.22, 1.05 + dr * .05), sweat: true, reflect: '#8ff4ff' } }); LWK.k = 1; c.restore();
+  head(c, PA.cold, { kind: 'arjun', view: 'q', expr: 'surprised', body: false, reflect: '#8ff4ff', E: { look: [Math.min(1, .2 + dr * .3) + .06 * Math.sin(u * 70), .05 * Math.cos(u * 83)], iris: Math.max(.5, .8 - dr * .06), open: Math.min(1.24, 1.05 + dr * .05), sweat: 2, gloom: 1, tears: dr > 3, brow: [-13, 8, 1], reflect: '#8ff4ff' } }); LWK.k = 1; c.restore();
   lband(1500 - ((t * 1500) % 2200), 240, '#8ff4ff', .22);
   flush();
   if (hold) { speedLines(g, Math.floor(u * 12), { type: 'radial', cx: 560, cy: 880, col: '#ffffff', a: .8, n: 70, r0: 520, wmul: .8 }); speedLines(e, Math.floor(u * 12), { type: 'radial', cx: 560, cy: 880, col: '#8ff4ff', a: .25, n: 70, r0: 520, wmul: .8 }); }
@@ -530,7 +530,7 @@ SCENES.mirror = S => {
   g.restore();
   e.save(); e.clip(R); e.fillStyle = rgba('#d8fff0', .35); e.fillRect(100, 322, 880, 20); airbrush(e, 540, 860, 300, 300, '#8ff4ff', .1 + .05 * Math.sin(lt * 9)); e.restore();
   // his reflection stutters for two drawings, then nothing
-  if (dr === 3 || dr === 5) { c.save(); c.beginPath(); c.roundRect(100, 250, 880, 1090, 54); c.clip(); c.translate(540, 760); c.scale(-1.75, 1.75); head(c, PA.cold, { kind: 'arjun', view: 'q', expr: 'surprised', E: { iris: .7 } }); c.restore(); tintCels('#bff4ff', .5); flush(dr === 3 ? .5 : .28, 0); }
+  if (dr === 3 || dr === 5) { c.save(); c.beginPath(); c.roundRect(100, 250, 880, 1090, 54); c.clip(); c.translate(540, 760); c.scale(-1.75, 1.75); head(c, PA.cold, { kind: 'arjun', view: 'q', expr: 'terror', E: { iris: .6 } }); c.restore(); tintCels('#bff4ff', .5); flush(dr === 3 ? .5 : .28, 0); }
   // glass sheen, rain beads, frame
   g.save(); g.clip(R); g.globalAlpha = .09; g.fillStyle = '#ffffff'; for (const [a, b] of [[520, 150], [760, 50]]) { g.beginPath(); g.moveTo(a, 250); g.lineTo(a + b, 250); g.lineTo(a + b - 380, 1340); g.lineTo(a - 380, 1340); g.fill(); }
   g.globalAlpha = .5; g.strokeStyle = '#cfe8ff'; g.lineWidth = 2.5; const RR = rng(40 + (dr % 3)); for (let i = 0; i < 26; i++) { const x = 120 + RR() * 840, y = 270 + RR() * 1040, l = 14 + RR() * 30; g.beginPath(); g.moveTo(x, y); g.lineTo(x - l * .5, y + l); g.stroke(); }
@@ -604,7 +604,7 @@ SCENES.end = S => {
     c.save(); c.translate(bx, by); c.scale(.96, .96);
     bus({ door: 0, wheelA: -tc * 30 });
     c.save(); c.beginPath(); c.roundRect(BWIN[1], -350, 100, 124, 10); c.clip(); c.fillStyle = BUSP.win; c.fillRect(BWIN[1], -350, 100, 124); c.translate(BWIN[1] + 56, -300); c.scale(-.66, .66); LWK.k = 1.5;
-    head(c, PA.cold, { kind: 'arjun', view: 'q', expr: 'neutral', E: { brow: [-6, 5, 1.5], lid: .32, look: [.3, .3], mouth: 'closed' } }); LWK.k = 1; c.restore();
+    head(c, PA.cold, { kind: 'arjun', view: 'q', expr: 'neutral', E: { brow: [-10, 7, 1], lid: .32, look: [.3, .3], mouth: 'frown', tears: true } }); LWK.k = 1; c.restore();
     c.strokeStyle = BUSP.frame; c.lineWidth = 4; c.strokeRect(BWIN[1], -350, 100, 124);
     c.restore();
     tintCels('#8fe8ff', .3);

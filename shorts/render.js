@@ -1,13 +1,14 @@
-// usage: node render.js <episode_dir> [--stills t1,t2,...]
+// usage: node render.js <episode_dir> [--size 1920x1080] [--stills t1,t2,...]
 // Renders film.html frame-by-frame in headless Chromium and pipes frames to ffmpeg.
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
 (async () => {
   const ep = path.resolve(process.argv[2]), FPS = 30;
+  const sz = process.argv.indexOf('--size'), [VW, VH] = sz > 0 ? process.argv[sz + 1].split('x').map(Number) : [1080, 1920];
   const T = JSON.parse(fs.readFileSync(path.join(ep, 'timings.json')));
   const b = await chromium.launch();
-  const p = await b.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
+  const p = await b.newPage({ viewport: { width: VW, height: VH }, deviceScaleFactor: 1 });
   p.on('pageerror', e => { console.error('PAGE ERROR', e.message); process.exit(1); });
   await p.goto('file://' + path.join(ep, 'film.html'));
   await p.evaluate(t => window.init(t), T);
@@ -21,7 +22,7 @@ const fs = require('fs'), path = require('path');
   }
   const out = path.join(ep, 'final.mp4');
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-c:v', 'mjpeg', '-r', FPS, '-i', '-',
-    '-i', path.join(ep, 'mix.wav'), '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', '-preset', 'medium',
+    '-i', path.join(ep, 'mix.wav'), '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '21', '-preset', 'medium',
     '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out], { stdio: ['pipe', 'inherit', 'inherit'] });
   const n = Math.round(T.total * FPS);
   for (let i = 0; i < n; i++) {

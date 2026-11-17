@@ -9,7 +9,7 @@ SR = 44100
 ep, model = Path(sys.argv[1]), sys.argv[2]
 mood = sys.argv[3] if len(sys.argv) > 3 else "upbeat"
 lscale = sys.argv[4] if len(sys.argv) > 4 else "0.95"
-lines = json.loads((ep / "script.json").read_text())
+_s = ep / "script.json"; lines = json.loads(_s.read_text()) if _s.exists() else []
 (ep / "vo").mkdir(exist_ok=True)
 
 

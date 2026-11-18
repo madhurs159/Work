@@ -1,0 +1,12 @@
+node_modules/
+# PDoomVideo source, fetched on demand by .claude/skills/paint-mv/scripts/fetch_upstream.mjs
+.claude/skills/paint-mv/upstream/
+.claude/skills/paint-mv/template/render.mjs
+.claude/skills/paint-mv/template/studio.html
+.claude/skills/paint-mv/template/src/core.js
+.claude/skills/paint-mv/template/src/timeline.js
+.claude/skills/paint-mv/template/src/props.js
+.claude/skills/paint-mv/template/src/clawd.js
+.claude/skills/paint-mv/template/src/cast.js
+.claude/skills/paint-mv-animate/examples/c0*.js
+.claude/skills/paint-mv-storyboard/pdoom-storyboard.md

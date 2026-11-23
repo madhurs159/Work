@@ -4,9 +4,11 @@ description: >-
   Rough-cut assistant for the owner's SAM Workshop (DJJS youth wing) event videos, in his editing style: highlights,
   aftermovies, teasers and testimonial videos that he finishes in Premiere Pro. Scans raw footage into contact sheets,
   picks shots by his selection rules (a packed, young, visibly engaged audience; band, musical ballet, lecture), fits
-  them to the music's beat grid and hands back selects and a cut plan. Use when the owner mentions SAM, an event
-  highlight, aftermovie, teaser, testimonial video, choosing shots from raw footage, a beat edit or a Premiere rough
-  cut, or wants to teach or correct his editing style.
+  them to the music's beat grid and hands back selects and a cut plan with markers for transitions, SFX and music
+  pull-outs. Also holds his catalogue of video transitions, sound design and colour taken from his own edits and
+  from the reference reels he wants to edit like. Use when the owner mentions SAM, an event highlight, aftermovie,
+  teaser, testimonial video, choosing shots from raw footage, a beat edit, a Premiere rough cut, transitions, sound
+  design, SFX placement or a reference reel, or wants to teach or correct his editing style.
 ---
 
 # sam-edit
@@ -19,9 +21,9 @@ Premiere Pro.
 The slow part of that job is finding the right moments in hours of footage and laying them on the beat. This skill
 does that part the way he would, so that he starts from a rough cut instead of from raw cards. He does the finish.
 
-**This skill is a skeleton until his finished edits have been studied** (see Studying his finished edits). He asked
-for that order on 2026-11-23: read his edits closely first, then write the style from them. Do not present the style
-part as his before that is done.
+His four finished edits and four reference reels were studied on 2026-11-23 (see Status). What was found is written
+down as measured, seen or guessed, and he has not confirmed it: he said that will show only after a first rough cut.
+So present it as "what the study found", and treat his corrections on the first rough cut as the real test.
 
 ## What is and is not Claude's job
 
@@ -40,6 +42,14 @@ all free; install them if they are missing.
 
 His computer runs Windows with the Claude Desktop app, and his work folder there is `F:\Claude`. A cloud session
 cannot see that folder unless he shares it through Remote Control (desktop app: Settings, Claude Code, Remote Control).
+
+### When there is no footage and no shell (phone, claude.ai chat)
+
+He wants this skill to work everywhere (2026-11-23). Away from his computer the scripts and the footage are not
+there, so do only what needs neither: answer from `style.md` and `transitions-sound.md`, plan a cut on paper, write
+marker and SFX lists for a sequence he describes, and take down his rules and corrections. A change to the skill
+made there cannot be saved into it: give him the exact text to add and tell him to paste it in a session on his
+computer. Never pretend to have looked at footage.
 
 ## Tokens
 
@@ -117,6 +127,22 @@ well exposed, the subject clear), say on the picks that these are Claude's judge
 Fast cuts on the beat, sometimes a montage with the footage sped up and slowed down, varied transitions, SFX, and
 music he chooses himself. Everything more specific is in `style.md`, including what is still unknown.
 
+**Where he wants to go (2026-11-23): the sound design and the video transitions of four reference reels** (two
+Diljit Dosanjh tour films, two concert reels by @baricci). `transitions-sound.md` is the catalogue of those: fifteen
+transitions (T1–T15) and seven sound moves (S1–S7) with where each was seen, how it is built and how to mark it, a
+colour comparison, and his own edits set against the references. Read it before writing any cut plan, marker list or
+SFX list, and use its marker wording (`TRANSITION T1 flash 3f`, `MUSIC OUT at …`, `SFX riser … ending at …`) so the
+cut sheet tells him exactly what to apply in Premiere. The short version:
+
+- A transition is 2–6 frames long and sits on a musical event or a change of chapter; two cuts in three stay hard.
+- Take the music away for 1–4 s before the biggest moments, and put a flash, burn or smear on the frame it returns.
+- Risers end dead on the cut; moving transitions get a whoosh; a low hit matters because the bass before it is empty.
+- No cross dissolves in the references: use smear, defocus or one or two black frames instead.
+- Keep SAM's branding (logo bug, end card, name strips, testimony frame) unless he says otherwise.
+
+The cut plan must therefore carry three things besides the cuts: `marks` for every transition and speed ramp, `sfx`
+for every riser, whoosh and impact, and music marks for every pull-out and bass cut.
+
 ## Learning: how this skill is "trained"
 
 Nothing here trains a model. The skill improves because his taste gets written down, in three ways.
@@ -142,15 +168,18 @@ For each finished video (720p is enough):
 
 1. `python3 <skill>/scripts/study.py <video>` writes `<video>.study/`. Keep his videos and this output out of the
    repo; only the findings go into `style.md`.
-2. Read `summary.txt`: pace, cuts against the beat, kinds of boundary, speed changes, sound cues.
+2. Read `summary.txt`: pace, cuts against the beat, kinds of boundary, speed changes, sound cues. Then run
+   `python3 <skill>/scripts/look.py <video>` for `look.txt`: brightness, black and clipped pixels, saturation, hues,
+   black-and-white runs, low hits and how many have a cut on them, pull-outs of the music.
 3. Look at every `shots_*.jpg`: what each shot shows (audience, band, ballet, lecture, speaker, testimony, title), how
    it is framed, in what order the kinds come, and whether what he used agrees with his selection rules.
 4. Look at every `cuts_*.jpg`: name each transition from its frames, and strike out false boundaries (a change of
    light or heavy motion inside one shot is often flagged `soft`).
 5. Look at every `sound_*.jpg`: where whooshes, risers, impacts and speech sit against the cuts and the beats. This
    picture is the only way to hear the track.
-6. Write the findings under Learned from finished edits in `style.md`, one block per video, with the numbers, and say
-   of each point whether it was measured, seen or guessed. Lift a point into the general style only when several
+6. Write the findings under Learned from finished edits in `style.md` (his own edits) or Where he wants to go
+   (reference edits by others), one block per video, with the numbers, and say of each point whether it was
+   measured, seen or guessed. A new transition or sound move goes into `transitions-sound.md` with its own number. Lift a point into the general style only when several
    videos agree on it.
 7. Tell him the findings in plain words and let him correct them.
 
@@ -166,7 +195,23 @@ transition names and SFX files exactly. The video alone shows those only as "pro
   a flash inside a shot, a speed change, repeated-frame slow motion) and runs on a real 4-minute 1080p file in under a
   minute. Its thresholds are not tuned on camera or concert footage: on the real file, lights flickering inside one
   shot were flagged as `soft` boundaries. The whoosh number is unreliable; trust the sound picture instead.
-- None of his finished edits has been studied yet, so `style.md` holds only what he has said.
+- Four finished edits were studied on his computer on 2026-11-23 (two teasers, one aftermovie, one public-review
+  video); the findings are in `style.md` under Learned from finished edits and are not yet confirmed by him. On real
+  concert footage `study.py` flags stage-light changes and stutters as `trans`, as expected.
+- Four reference edits by others that he wants to move towards (two Diljit Dosanjh tour films, two concert reels by
+  @baricci) were studied the same day; see Where he wants to go in `style.md`. He has not yet said which qualities of
+  them he is after, so a rough cut still follows his own style unless he says otherwise. Instagram reels download
+  with yt-dlp on his computer without a login. `study.py` ignores a sideways (rotate-your-phone) picture.
+- All eight videos were gone through again the same day for transitions, sound and colour: every cut sheet and
+  shots sheet, and all sound sheets except seven long interview stretches. Result: `transitions-sound.md`.
+  `look.py` is new and untuned: its riser count is unreliable (read risers off the sound sheets), and its loudness
+  range is wrong when a video ends in digital silence.
+- This skill is installed for every Claude Code session on his computer at `%USERPROFILE%\.claude\skills\sam-edit`.
+  That copy is the one that runs. `F:\Claude\Work\.claude\skills\sam-edit` is the copy for the repo; after changing
+  one, copy it over the other.
+- His computer: no git; Python 3.12 is at `%LOCALAPPDATA%\Programs\Python\Python312\python.exe` (not on PATH in an
+  already-open shell), with numpy, Pillow and yt-dlp; Deno and ffmpeg are installed through winget. This skill's
+  files are in `F:\Claude\Work`, fetched file by file, so that folder is not a git clone.
 - Not built: writing a Premiere timeline (`make_xml.py`). Build it from one real Final Cut Pro XML export out of his
   Premiere and mirror its structure exactly (clip items, file and path entries, speed, audio tracks) rather than
   writing the format from memory. In the timeline: cuts and constant speeds as clips, music and SFX as audio clips,

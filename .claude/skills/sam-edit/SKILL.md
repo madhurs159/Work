@@ -7,7 +7,8 @@ description: >-
   them to the music's beat grid and hands back selects and a cut plan with markers for transitions, SFX and music
   pull-outs. Also holds his catalogue of video transitions, sound design and colour taken from his own edits and
   from the reference reels he wants to edit like. Use when the owner mentions SAM, an event highlight, aftermovie,
-  teaser, testimonial video, choosing shots from raw footage, a beat edit, a Premiere rough cut, transitions, sound
+  teaser, testimonial video, choosing shots or best moments from raw footage, a beat edit, a Premiere or CapCut
+  rough cut, transitions, sound
   design, SFX placement or a reference reel, or wants to teach or correct his editing style.
 ---
 
@@ -76,6 +77,30 @@ frames). Do a coarse pass over everything first and zoom only into shots that mi
 7. **Cut plan.** Write `_sam/edl.json` and `_sam/cut_sheet.md`, the same cut as a table he can follow in Premiere:
    timeline time, clip, source in and out, speed, note.
 8. **Premiere timeline.** Not built yet; see Status.
+
+### When he edits in CapCut (asked for on 2026-11-23)
+
+He also edits in CapCut, and there he wants the best moments handed over as clips he can import, instead of
+importing everything. Claude cannot see inside a CapCut project: always work from the footage folder.
+
+Do steps 1–5 as above (brief, scan, sort, find the moment, selects and his corrections on the picks sheets). Then:
+
+- `python3 <skill>/scripts/clips.py <footage>` cuts every select into its own clip in `<footage>/_sam/selects/`,
+  named `NNN_<kind>_<clip>_<m-ss>`, and writes `selects.tsv` there (clip, source file, in, out, kind, part, why).
+  It only reads the originals. Cut only after he has agreed the picks.
+- Default is a copy without re-encoding: no quality loss, but a clip starts on the keyframe before the chosen
+  moment, so it carries spare footage in front (about a second on camera files; up to several seconds on
+  long-GOP files) plus `--handles` (default 1 s) on both sides. Tell him the chosen moment is not at the first frame;
+  `selects.tsv` has the exact in and out. Use `--exact` only if he wants clips that start on the frame: it re-encodes.
+- Number the selects in the order they should be tried in the edit (strongest audience shots first within each
+  part), because CapCut sorts imports by name.
+- Hand over: the `selects` folder to import, `selects.tsv`, and the picks sheets. If there is music, also do steps 6
+  and 7 and give `cut_sheet.md`, with clip names from the `selects` folder instead of source files, and the
+  transition, SFX and music marks from `transitions-sound.md` written in plain words (CapCut has its own effect
+  names; describe the effect — "white flash 3 frames", "smear left 4 frames" — and let him pick the preset).
+
+Asking for "best moments for a highlight" means selects, not a finished cut: stop after the hand-over unless he asks
+for the cut plan.
 
 ### Files
 
@@ -225,6 +250,10 @@ transition names and SFX files exactly. The video alone shows those only as "pro
 - Shot selection was studied the same day: all 954 shots of the eight videos labelled from the shots sheets
   (`F:\Claude\sam_refs\labels.txt`) and counted with the new `scripts/shotmix.py`. Result: `shot-selection.md`.
   Labels rest on 1–3 small frames a shot; percentages are ±5 points.
+- `clips.py` (new, for CapCut) was tested on two downloaded files only: copy and `--exact` both produce playable
+  clips, a missing source is reported and skipped, and it refuses to write among the originals. On those long-GOP
+  files a copy of a 2.5 s select came out 9 s long. Not yet run on his camera files (codec, 10-bit, variable frame
+  rate from phones are untested).
 - This skill is installed for every Claude Code session on his computer at `%USERPROFILE%\.claude\skills\sam-edit`.
   That copy is the one that runs. `F:\Claude\Work\.claude\skills\sam-edit` is the copy for the repo; after changing
   one, copy it over the other.

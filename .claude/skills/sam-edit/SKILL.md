@@ -46,7 +46,7 @@ cannot see that folder unless he shares it through Remote Control (desktop app: 
 ### When there is no footage and no shell (phone, claude.ai chat)
 
 He wants this skill to work everywhere (2026-11-23). Away from his computer the scripts and the footage are not
-there, so do only what needs neither: answer from `style.md` and `transitions-sound.md`, plan a cut on paper, write
+there, so do only what needs neither: answer from `style.md`, `shot-selection.md` and `transitions-sound.md`, plan a cut on paper, write
 marker and SFX lists for a sequence he describes, and take down his rules and corrections. A change to the skill
 made there cannot be saved into it: give him the exact text to add and tell him to paste it in a session on his
 computer. Never pretend to have looked at footage.
@@ -119,8 +119,17 @@ foreground spoils an otherwise good shot.
 
 ### Stage shots: band, ballet, lecture, speakers, testimonies
 
-He has not stated rules for these yet. Until he does, use ordinary craft (in focus, steady or deliberately moving,
-well exposed, the subject clear), say on the picks that these are Claude's judgement, and ask him what he looks for.
+He has not stated rules for these yet. Until he does, pick the way his finished edits show (`shot-selection.md`,
+sections 2 and 5): the peak of a gesture, medium from the pit with CO2, confetti or fire in frame, one wide of a
+ballet formation then the lead at the top of a jump, a speaker waist-up with a hand raised. Say on the picks that
+these come from his edits and not from a rule he stated, and ask him what he looks for.
+
+### What his finished edits and the reference reels show
+
+`shot-selection.md` holds the shot-by-shot study of all eight videos (954 shots labelled by kind and size): what he
+picks for each kind of shot, what the references pick, the two set side by side, and a checklist for picking from
+raw footage. Read it before step 4 (Find the moment) and step 5 (Selects). In `selects.json`, put the kind and size
+in `kind`, and in `why` say what is in the air (confetti, CO2, fire), the light colour and the peak that was chosen.
 
 ## Edit style
 
@@ -206,6 +215,9 @@ transition names and SFX files exactly. The video alone shows those only as "pro
   shots sheet, and all sound sheets except seven long interview stretches. Result: `transitions-sound.md`.
   `look.py` is new and untuned: its riser count is unreliable (read risers off the sound sheets), and its loudness
   range is wrong when a video ends in digital silence.
+- Shot selection was studied the same day: all 954 shots of the eight videos labelled from the shots sheets
+  (`F:\Claude\sam_refs\labels.txt`) and counted with the new `scripts/shotmix.py`. Result: `shot-selection.md`.
+  Labels rest on 1–3 small frames a shot; percentages are ±5 points.
 - This skill is installed for every Claude Code session on his computer at `%USERPROFILE%\.claude\skills\sam-edit`.
   That copy is the one that runs. `F:\Claude\Work\.claude\skills\sam-edit` is the copy for the repo; after changing
   one, copy it over the other.

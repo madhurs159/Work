@@ -113,6 +113,13 @@ Every audience shot, whatever is on stage:
 
 Teasers and highlights lean on these shots the most: they have to say that the audience is loving SAM.
 
+Two answers he gave on 2026-11-23, after his finished edits were studied:
+- **The loose-crowd shots in his own edits were forced, not chosen** (Janmashtami teaser #33, aftermovie #99, #186,
+  #188: people seen from behind with gaps). The full-house rule stands. Do not take such a shot because his old
+  edits contain one; offer one only when nothing packed exists for that moment, and say so on the pick.
+- **A camera operator in frame is acceptable when the shot and the mood are good.** It is not a reason to reject a
+  strong shot, and not a licence to take a weak one.
+
 Claude's reading of the above, not his words: a crowd shot belongs with the stage content it was filmed during (a
 dancing crowd with the band, a listening crowd with the lecture), and one visibly bored or distracted person in the
 foreground spoils an otherwise good shot.

@@ -98,7 +98,7 @@ Performers on stage (band, ballet, speaker together):
 - **Length.** 0.26–0.76 s median. Longest audience shot in any of his edits: 4.8 s.
 - **Against his stated rules** (packed, young, engaged): almost every audience shot agrees. Shots where the crowd is
   seen loosely from behind with ground or gaps visible: J #33, A #99 (people dancing in open space), A #186, A #188.
-  They are few; whether he would still pick them is a question for him. The IITF review shows a seated, mixed-age
+  They are few, and he said on 2026-11-23 that they were forced, not chosen. The IITF review shows a seated, mixed-age
   audience (it is a public fair), in black and white for 1.5 s and in blue wides.
 
 ### Band and singers
@@ -111,8 +111,8 @@ Performers on stage (band, ballet, speaker together):
   #46–47), dhol (A #58, R #41), tabla (R #81), keys (A #68). One short shot each, on a fill or an accent.
 - **The same performer shot cut into 3–5 pieces** on consecutive beats (J #58–62, A #32–34, #42–44, #201–207).
 - **Close is rare** (8–38 %), true close-ups of a face almost absent. Wide stage shots are counted under venue.
-- Seen and probably not wanted: a camera operator with a gimbal is in frame behind the singer in A #204–206 and
-  A #193. Ask him whether that is acceptable or was the only angle.
+- A camera operator with a gimbal is in frame behind the singer in A #204–206 and A #193. He said on 2026-11-23
+  that this is acceptable when the shot and the mood are good.
 
 ### Musical ballet, dance, skit
 
@@ -239,7 +239,8 @@ For every candidate span, mark the **peak frame** and take 0.3–1 s around it f
 - Audience, lecture on stage: one or two still faces, eyes on the stage, 1–2.5 s.
 - Audience, ballet on stage: nothing in his edits shows this clearly yet; use his stated rule (eyes on the ballet).
 - Band: medium from the pit with CO2, confetti or sparks in frame, at the top of a gesture; one shot of each player
-  on an accent. Reject: performer idle, back turned by accident, a crew member crossing the frame.
+  on an accent. Reject: performer idle, back turned by accident. A camera operator in frame is acceptable when
+  the shot and mood are good (his answer, 2026-11-23).
 - Ballet: one wide of the full formation per act, then medium on the lead at the top of a jump, spin or pose;
   fire, flags, torches in frame.
 - Speaker: waist up, a hand raised. One to three seconds. Reject hands-down and reading.
@@ -257,7 +258,7 @@ blurred pan); the way to the venue and the ground filling up; one calm long shot
 
 - His rules for stage shots, in his own words. Section 2 is what he used, not why.
 - What he rejects. Needs raw footage and his corrections.
-- Whether the loose-crowd shots (J #33, A #99, #186, #188) and the crew-in-frame shots (A #193, #204–206) were
-  choices or the best that was there.
+- Answered by him on 2026-11-23: the loose-crowd shots (J #33, A #99, #186, #188) were forced (majboori), so the
+  full-house rule stands; a camera operator in frame (A #193, #204–206) is fine when the shot and mood are good.
 - Whether he wants any of section 3 in the pictures, or only the transitions and sound he named.
 - Whether the raw footage holds what the references use: long-lens close faces, drone passes, backstage, arrival.

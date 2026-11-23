@@ -28,7 +28,8 @@ def load(path):
 
 
 def onsets(y):
-    """Accent strength per analysis frame: all bands, and bass only. Frame i is centred on sample i*HOP."""
+    """Per analysis frame: accent strength over all bands, accent strength in the bass, and the level in dB of
+    the 3-10 kHz band (hiss, air, cymbals, whooshes). Frame i is centred on sample i*HOP."""
     pad = np.zeros(NFFT // 2, np.float32)
     y = np.concatenate([pad, y, pad])
     n = 1 + (len(y) - NFFT) // HOP
@@ -36,11 +37,13 @@ def onsets(y):
     edges = np.unique(np.geomspace(1, NFFT // 2, 41).astype(int))       # ~40 log-spaced bands
     bands = np.empty((n, len(edges) - 1), np.float32)
     bass = np.empty(n, np.float32)
+    air = np.empty(n, np.float32)
     for a in range(0, n, 4096):
         rows = np.arange(a, min(n, a + 4096))
         S = np.abs(np.fft.rfft(y[np.arange(NFFT)[None, :] + HOP * rows[:, None]] * win, axis=1))
         bands[rows] = np.log1p(10 * np.add.reduceat(S, edges[:-1], axis=1))
         bass[rows] = np.log1p(10 * S[:, 1:8].sum(axis=1))               # below ~150 Hz
+        air[rows] = 10 * np.log10((S[:, 140:465] ** 2).sum(axis=1) + 1e-9)
 
     def flux(x):
         d = np.maximum(0, np.diff(x, axis=0, prepend=x[:1]))
@@ -48,7 +51,7 @@ def onsets(y):
         d = np.maximum(0, d - np.convolve(d, np.ones(50) / 50, 'same'))  # minus a 1 s running mean
         return d / (d.std() + 1e-9)
 
-    return flux(bands), flux(bass)
+    return flux(bands), flux(bass), air
 
 
 def tempo(env, lo=60.0, hi=200.0):
@@ -129,7 +132,7 @@ def sections(sm, times, end):
 def analyse(path, bpm=None):
     y = load(path)
     dur = len(y) / SR
-    env, bass = onsets(y)
+    env, bass, _ = onsets(y)
     bpm = bpm or tempo(env)
     period = 60 * FPS / bpm
     idx = track(env, period)

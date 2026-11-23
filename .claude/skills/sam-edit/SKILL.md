@@ -19,6 +19,10 @@ Premiere Pro.
 The slow part of that job is finding the right moments in hours of footage and laying them on the beat. This skill
 does that part the way he would, so that he starts from a rough cut instead of from raw cards. He does the finish.
 
+**This skill is a skeleton until his finished edits have been studied** (see Studying his finished edits). He asked
+for that order on 2026-11-23: read his edits closely first, then write the style from them. Do not present the style
+part as his before that is done.
+
 ## What is and is not Claude's job
 
 - Claude: watch the footage through contact sheets, choose shots by his rules, plan the cut on the beat, hand over
@@ -115,25 +119,47 @@ music he chooses himself. Everything more specific is in `style.md`, including w
 Nothing here trains a model. The skill improves because his taste gets written down, in three ways.
 
 1. **What he says.** A rule he states goes into Selection rules or `style.md`, dated, in his meaning, not embellished.
-2. **His finished edits.** For each finished SAM video he exports the sequence from Premiere (File → Export → Final
-   Cut Pro XML) and keeps the final mp4. From those, measure and write into `style.md`: shot lengths against the beat,
-   where cuts sit relative to the beat, speed changes, which transitions and where, which SFX and where against the
-   cut, the music (genre, BPM, where the drop lands), the order of shot kinds from opening to end, the share of
-   audience against stage shots, titles.
+2. **His finished edits.** The main source. See Studying his finished edits below.
 3. **His corrections.** When he rejects or swaps a pick or a cut, append it to Corrections in `style.md` with the
    date, what and why. A correction that comes twice becomes a rule.
 
 Never write down a preference he has not stated or shown. Where nothing is known, use a default and say that it is one.
+
+## Studying his finished edits
+
+For each finished video (an mp4 he exported; 720p is enough):
+
+1. `python3 <skill>/scripts/study.py <video>` writes `<video>.study/`. Keep his videos and this output out of the
+   repo; only the findings go into `style.md`.
+2. Read `summary.txt`: pace, cuts against the beat, kinds of boundary, speed changes, sound cues.
+3. Look at every `shots_*.jpg`: what each shot shows (audience, band, ballet, lecture, speaker, testimony, title), how
+   it is framed, in what order the kinds come, and whether what he used agrees with his selection rules.
+4. Look at every `cuts_*.jpg`: name each transition from its frames, and strike out false boundaries (a change of
+   light or heavy motion inside one shot is often flagged `soft`).
+5. Look at every `sound_*.jpg`: where whooshes, risers, impacts and speech sit against the cuts and the beats. This
+   picture is the only way to hear the track.
+6. Write the findings under Learned from finished edits in `style.md`, one block per video, with the numbers, and say
+   of each point whether it was measured, seen or guessed. Lift a point into the general style only when several
+   videos agree on it.
+7. Tell him the findings in plain words and let him correct them.
+
+If he also has the Premiere sequence, its Final Cut Pro XML export (File → Export → Final Cut Pro XML) settles speed,
+transition names and SFX files exactly. The video alone shows those only as "probably".
 
 ## Status (2026-11-23)
 
 - `scan.py` (scan, zoom, picks) and `beats.py` work on synthetic test clips and on click tracks at 97, 128 and 174
   BPM (tempo exact, beats within about 16 ms, drop found). Neither has run on his camera files or on real music yet,
   and the D / B / S flags are untuned.
-- Not built: reading his finished edits (`learn_style.py`) and writing a Premiere timeline (`make_xml.py`). Build both
-  from one real Final Cut Pro XML export out of his Premiere and mirror its structure exactly (clip items, file and
-  path entries, speed, audio tracks) rather than writing the format from memory. In the timeline: cuts and constant
-  speeds as clips, music and SFX as audio clips, transitions and speed ramps as markers for him to apply.
-- `style.md` holds only what he has said. Nothing has been learned from his edits yet.
-- Needed from him: 3–5 finished SAM edits (XML export and final mp4), the folders he keeps SFX and music in, and one
-  event's raw footage for a first rough cut.
+- `study.py` finds all 28 boundaries of a synthetic beat edit with known cuts (hard cuts, a whip, a flash, a dissolve,
+  a flash inside a shot, a speed change, repeated-frame slow motion) and runs on a real 4-minute 1080p file in under a
+  minute. Its thresholds are not tuned on camera or concert footage: on the real file, lights flickering inside one
+  shot were flagged as `soft` boundaries. The whoosh number is unreliable; trust the sound picture instead.
+- None of his finished edits has been studied yet, so `style.md` holds only what he has said.
+- Not built: writing a Premiere timeline (`make_xml.py`). Build it from one real Final Cut Pro XML export out of his
+  Premiere and mirror its structure exactly (clip items, file and path entries, speed, audio tracks) rather than
+  writing the format from memory. In the timeline: cuts and constant speeds as clips, music and SFX as audio clips,
+  transitions and speed ramps as markers for him to apply.
+- Needed from him: 3–5 finished SAM edits of different kinds as mp4 (attached in chat they arrive in
+  `/mnt/user-data/uploads/`; YouTube, Instagram and Drive links do not open from the cloud session), then the folders
+  he keeps SFX and music in, and one event's raw footage for a first rough cut.

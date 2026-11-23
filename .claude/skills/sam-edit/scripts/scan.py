@@ -87,33 +87,31 @@ def font(size):
         return ImageFont.load_default()
 
 
-def sheet(cells, cols, out):
-    """cells: (image path or None, label, red flag text). Writes one JPEG."""
+def sheet(cells, cols, out, aspect=9 / 16):
+    """cells: (image path, PIL image or None, label, red flag text). Writes one JPEG."""
     cw = SHEET_W // cols
-    ch = round(cw * 9 / 16)
+    ch = round(cw * aspect)
     rows = math.ceil(len(cells) / cols)
     im = Image.new('RGB', (cw * cols, rows * (ch + LABEL_H)), (16, 16, 16))
     d, f = ImageDraw.Draw(im), font(14)
     for k, (p, label, flag) in enumerate(cells):
         x, y = (k % cols) * cw, (k // cols) * (ch + LABEL_H)
-        if p:
-            with Image.open(p) as t:
-                t = t.convert('RGB')
-                t.thumbnail((cw - 2, ch))
-                im.paste(t, (x + (cw - t.width) // 2, y + (ch - t.height) // 2))
+        if p is not None:
+            t = (p if isinstance(p, Image.Image) else Image.open(p)).convert('RGB')
+            t.thumbnail((cw - 2, ch))
+            im.paste(t, (x + (cw - t.width) // 2, y + (ch - t.height) // 2))
         d.text((x + 4, y + ch + 1), label, fill=(255, 255, 255), font=f)
         if flag:
-            d.text((x + cw - 14, y + ch + 1), flag, fill=(255, 80, 80), font=f)
+            d.text((x + cw - 6 - d.textlength(flag, font=f), y + ch + 1), flag, fill=(255, 80, 80), font=f)
     im.save(out, quality=82)
 
 
-def sheets(cells, cols, rows, outdir, prefix):
+def sheets(cells, cols, rows, outdir, prefix, aspect=9 / 16):
     """Split cells over as many sheets as needed; returns the sheet name of every cell."""
     per, names = cols * rows, []
-    many = len(cells) > per
     for k in range(0, len(cells), per):
-        name = f'{prefix}_{k // per + 1:03d}.jpg' if many or prefix == 'sheet' else f'{prefix}.jpg'
-        sheet(cells[k:k + per], cols, outdir / name)
+        name = f'{prefix}_{k // per + 1:03d}.jpg'
+        sheet(cells[k:k + per], cols, outdir / name, aspect)
         names += [name] * len(cells[k:k + per])
     return names
 

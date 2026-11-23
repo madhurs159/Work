@@ -40,3 +40,4 @@ Episode 1 is `shorts/long1/` ("आख़िरी बस", 4:11).
   current status and what is still needed from him. It has to run on his computer, where the footage is.
 - He uses the Claude Desktop app on Windows; his work folder is `F:\Claude`. For his finished edits he can give only
   YouTube / Instagram links, and those open from his computer, not from a cloud session.
+- His edits are read with the skill's own tools only: he turned down Gemini and third-party video-watching skills.

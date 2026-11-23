@@ -136,11 +136,7 @@ sign-in check ("confirm you're not a bot"); do not try to get around it. On his 
 `yt-dlp -f "bv*[height<=720]+ba/b[height<=720]" --merge-output-format mp4 -o "F:/Claude/sam_refs/%(title).60s [%(id)s].%(ext)s" <link>`
 (it needs ffmpeg, and a JavaScript runtime for YouTube: Deno, or `--js-runtimes node` when Node is installed).
 
-A second way to read a YouTube link, from anywhere: `python3 <skill>/scripts/watch_link.py <link>` has Google's Gemini
-watch it and describe the picture and the sound (it hears the track, which Claude cannot). It needs his go-ahead to
-send the link to Google and his free Gemini key, asked for through the secure key form, never in chat. It describes
-and does not measure: times to the second, and it can be wrong. Mark what comes from it as "Gemini says" in
-`style.md` and check it against `study.py` or with him. Not yet run against the API (2026-11-23).
+He chose to read his edits with these tools only (2026-11-23): no Gemini and no third-party video-watching skill.
 
 For each finished video (720p is enough):
 

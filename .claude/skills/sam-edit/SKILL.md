@@ -38,6 +38,9 @@ Desktop app, or `claude remote-control` started in the footage folder). Never co
 container. Work files go in `<footage>/_sam/`. Needs ffmpeg and ffprobe on PATH and Python 3 with numpy and Pillow,
 all free; install them if they are missing.
 
+His computer runs Windows with the Claude Desktop app, and his work folder there is `F:\Claude`. A cloud session
+cannot see that folder unless he shares it through Remote Control (desktop app: Settings, Claude Code, Remote Control).
+
 ## Tokens
 
 He is short on tokens. Never open video frames one at a time: look only at contact sheets (under 2k tokens for 30
@@ -127,7 +130,13 @@ Never write down a preference he has not stated or shown. Where nothing is known
 
 ## Studying his finished edits
 
-For each finished video (an mp4 he exported; 720p is enough):
+He can give only YouTube and Instagram links to his finished edits. From a cloud session YouTube answers with a
+sign-in check ("confirm you're not a bot"); do not try to get around it. On his own computer the links normally open:
+`python -m pip install "yt-dlp[default]"`, then
+`yt-dlp -f "bv*[height<=720]+ba/b[height<=720]" --merge-output-format mp4 -o "F:/Claude/sam_refs/%(title).60s [%(id)s].%(ext)s" <link>`
+(it needs ffmpeg, and a JavaScript runtime for YouTube: Deno, or `--js-runtimes node` when Node is installed).
+
+For each finished video (720p is enough):
 
 1. `python3 <skill>/scripts/study.py <video>` writes `<video>.study/`. Keep his videos and this output out of the
    repo; only the findings go into `style.md`.
@@ -160,6 +169,6 @@ transition names and SFX files exactly. The video alone shows those only as "pro
   Premiere and mirror its structure exactly (clip items, file and path entries, speed, audio tracks) rather than
   writing the format from memory. In the timeline: cuts and constant speeds as clips, music and SFX as audio clips,
   transitions and speed ramps as markers for him to apply.
-- Needed from him: 3–5 finished SAM edits of different kinds as mp4 (attached in chat they arrive in
-  `/mnt/user-data/uploads/`; YouTube, Instagram and Drive links do not open from the cloud session), then the folders
-  he keeps SFX and music in, and one event's raw footage for a first rough cut.
+- Needed from him: links to 3–5 finished SAM edits of different kinds, read in a session on his computer (a file
+  attached to a cloud chat arrives in `/mnt/user-data/uploads/`), then the folders he keeps SFX and music in, and one
+  event's raw footage for a first rough cut.

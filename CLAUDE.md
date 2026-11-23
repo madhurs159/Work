@@ -31,3 +31,10 @@ Episode 1 is `shorts/long1/` ("आख़िरी बस", 4:11).
 - `paint-mv`, `paint-mv-storyboard`, `paint-mv-animate`, `paint-mv-render` — song/narration + lyrics → watercolour video.
   The drawing engine is not included: it is fetched from `JohnHeibel/PDoomVideo` (no licence), which needs the owner to
   give the session access to that repository. It also uses one subagent per chapter, so it is token-heavy.
+- `sam-edit` — the owner's other work: rough cuts of SAM event videos in his style (see below).
+
+## SAM event editing (separate from the channel)
+- The owner volunteers as editor for SAM Workshop (DJJS youth wing): event highlights, aftermovies, teasers and
+  testimonial videos, finished in Premiere Pro. Professionally he generates AI videos and edits them in Premiere.
+- `.claude/skills/sam-edit/` holds his shot-selection rules, his edit style and the tools. Its SKILL.md has the
+  current status and what is still needed from him. It has to run on his computer, where the footage is.

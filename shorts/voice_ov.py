@@ -40,7 +40,12 @@ def auto_segs(L, parts):   # no hand-written direction: narrator pauses after ev
     return [{"who": who, "speed": sp, "pause": PAUSE.get(p[-1], .3) if k + 1 < len(parts) else 0} for k, p in enumerate(parts)]
 
 
-def say(text, who, speed, seed):
+CACHE = ep / "cache"; CACHE.mkdir(exist_ok=True)
+def say(text, who, speed, seed):   # each clip is cached, so a killed run resumes where it stopped
+    import hashlib; f = CACHE / (hashlib.md5(f"{text}|{who}|{speed}|{seed}".encode()).hexdigest() + ".npy")
+    if f.exists(): return np.load(f)
+    a = _say(text, who, speed, seed); np.save(f, a); return a
+def _say(text, who, speed, seed):
     torch.manual_seed(seed)
     kw = voice_kw(who)
     a = raw(m.generate(text=text, language="hi", speed=speed, **kw))

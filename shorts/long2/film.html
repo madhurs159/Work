@@ -1,0 +1,286 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+@font-face{font-family:Mukta;font-weight:600;src:url(../node_modules/@fontsource/mukta/files/mukta-devanagari-600-normal.woff2)}
+@font-face{font-family:Mukta;font-weight:600;src:url(../node_modules/@fontsource/mukta/files/mukta-latin-600-normal.woff2);unicode-range:U+0000-00FF,U+2026}
+@font-face{font-family:Mukta;font-weight:800;src:url(../node_modules/@fontsource/mukta/files/mukta-devanagari-800-normal.woff2)}
+@font-face{font-family:Mukta;font-weight:800;src:url(../node_modules/@fontsource/mukta/files/mukta-latin-800-normal.woff2);unicode-range:U+0000-00FF,U+2026}
+@font-face{font-family:Rozha;font-weight:400;src:url(../node_modules/@fontsource/rozha-one/files/rozha-one-devanagari-400-normal.woff2)}
+@font-face{font-family:Rozha;font-weight:400;src:url(../node_modules/@fontsource/rozha-one/files/rozha-one-latin-400-normal.woff2);unicode-range:U+0000-00FF,U+2026}
+html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}
+</style>
+<canvas id="gl" width="1920" height="1080"></canvas>
+<script src="../opuscar/cel-anime-80s/lib.js"></script>
+<script src="../opuscar/cel-anime-80s/post.js"></script>
+<script src="../opuscar/cel-anime-80s/fx.js"></script>
+<script src="../opuscar/cel-anime-80s/chars.js"></script>
+<script src="../opuscar/cel-anime-80s/scenes.js"></script>
+<script>
+// Long-form 16:9 film. The cel-anime library draws in a 1080-wide "world"; a view window (win) maps part of it to 1920x1080.
+const OW = 1920, OH = 1080, KK = OW / 1080;
+const [sc, g] = canvas(OW, OH), [gc, e] = canvas(OW, OH), [cc, c] = canvas(OW, OH), [ovc, ov] = canvas(OW, OH);
+let POST = null, T = null;
+const VIEW = { k: KK, x: 0, y: 600 };
+for (const x of [g, e, c]) { x._st = x.setTransform.bind(x); x.setTransform = (a, b, c2, d, ee, f) => x._st(VIEW.k * a, VIEW.k * b, VIEW.k * c2, VIEW.k * d, VIEW.k * (ee - VIEW.x), VIEW.k * (f - VIEW.y)); }
+function win(cx = 540, cy = 900, k = KK) { VIEW.k = k; VIEW.x = cx - OW / 2 / k; VIEW.y = cy - OH / 2 / k; for (const x of [g, e, c]) x.setTransform(1, 0, 0, 1, 0, 0); }
+flush = function (a = 1, sa = 1) {
+  g.save(); g._st(1, 0, 0, 1, 0, 0); g.globalAlpha = a; g.drawImage(cc, 0, 0); g.restore();
+  e.save(); e._st(1, 0, 0, 1, 0, 0); e.globalAlpha = sa; e.globalCompositeOperation = 'destination-out'; e.drawImage(cc, 0, 0);
+  e.globalAlpha = 1; e.globalCompositeOperation = 'destination-over'; e.fillStyle = '#000'; e.fillRect(0, 0, OW, OH); e.restore();
+  c.save(); c._st(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, OW, OH); c.restore();
+};
+rainFx = () => {};   // the story says it is not raining
+const rawBoth = fn => { for (const [ctx, em] of [[g, 0], [e, 1]]) { ctx.save(); ctx._st(1, 0, 0, 1, 0, 0); fn(ctx, em); ctx.restore(); } };
+const veil = (col, a) => { if (a <= 0) return; g.save(); g._st(1, 0, 0, 1, 0, 0); g.globalAlpha = Math.min(1, a); g.fillStyle = col; g.fillRect(0, 0, OW, OH); g.restore(); };
+
+function chunks(L) { return L._c || (L._c = L.ck.map(x => ({ s: x.s, e: x.e, p: x.p.replace(/[।,]$/, '') }))); }
+const WHO = { rohan: ['रोहन', '#8ff4ff'], amma: ['अम्मा', '#ffb0e0'], maa: ['माँ', '#ffd08a'], chowk: ['चौकीदार', '#c8f08a'], girl: ['आवाज़', '#ff8a8a'] }, WHOID = { h2: ['माँ…?', '#ff9a6a'], g3: ['माँ…?', '#ff9a6a'], g8: ['माँ…?', '#ff6a5a'] };
+function caption(t) {
+  ov.setTransform(1, 0, 0, 1, 0, 0); ov.clearRect(0, 0, OW, OH);
+  for (const L of T.lines) { if (t < L.start - .05 || t > L.end + .3) continue;
+    const cs = chunks(L), ch = cs.find(x => t < x.e) || cs[cs.length - 1], who = WHOID[L.id] || WHO[L.who];
+    ov.save(); ov.font = '800 64px Mukta'; ov.textAlign = 'center'; ov.textBaseline = 'middle'; ov.lineJoin = 'round';
+    let rows = [ch.p]; if (ov.measureText(ch.p).width > 1500) { const w = ch.p.split(' '), h = Math.ceil(w.length / 2); rows = [w.slice(0, h).join(' '), w.slice(h).join(' ')]; }
+    const y0 = 990 - (rows.length - 1) * 80;
+    if (who) { ov.font = '800 34px Mukta'; const tw = ov.measureText(who[0]).width + 62, tx = OW / 2 - tw / 2, ty = y0 - 100;
+      ov.fillStyle = rgba('#07121a', .8); ov.beginPath(); ov.roundRect(tx, ty, tw, 50, 8); ov.fill(); ov.strokeStyle = who[1]; ov.lineWidth = 3; ov.stroke();
+      ov.fillStyle = '#ff4a4a'; ov.beginPath(); ov.arc(tx + 24, ty + 25, 7, 0, 7); ov.fill(); ov.fillStyle = who[1]; ov.textAlign = 'left'; ov.fillText(who[0], tx + 42, ty + 27); ov.textAlign = 'center'; ov.font = '800 64px Mukta'; }
+    rows.forEach((r, i) => { const y = y0 + i * 80;
+      ov.shadowColor = 'rgba(0,0,0,.6)'; ov.shadowBlur = 12; ov.shadowOffsetY = 4; ov.strokeStyle = '#120a1e'; ov.lineWidth = 14; ov.strokeText(r, OW / 2, y);
+      ov.shadowColor = 'transparent'; ov.fillStyle = who ? who[1] : '#fff0a0'; ov.fillText(r, OW / 2, y); });
+    ov.restore(); return; }
+}
+
+// ---------- palettes for the new characters ----------
+const PM = palset(B_OLD, 'day', { skin: { f: '#d8a07c', s: '#a8684e', h: '#f2cba8', l: '#55281c' }, hair: { f: '#5a5260', s: '#3a3442', h: '#9a92a8', l: '#1e1a26' }, sari: { f: '#c8553c', s: '#8c2e36', h: '#f09a78', l: '#4a1622' }, border: { f: '#e8b84a', s: '#a87a2a', l: '#5a3a10' } });
+const PWOM = palset(B_OLD, 'bus', { skin: { f: '#b89c9c', s: '#76648e', h: '#e0d0d0', l: '#38243a' }, hair: { f: '#2c2638', s: '#1a1626', h: '#5a5278', l: '#0c0a14' }, sari: { f: '#5a8a7a', s: '#34586a', h: '#9ad0b8', l: '#12283a' } });
+const PWET = palset(B_ARJ, 'cold', { skin: { f: '#a8b4c4', s: '#5c6898', h: '#e0f0f8', l: '#28284a' }, jacket: { f: '#3c5870', s: '#22344e', h: '#8ab8d0', l: '#0c1626' }, stripe: { f: '#8aa0b8', s: '#5a6c88', l: '#22304a' }, pants: { f: '#2a3048', s: '#181c30', h: '#4a5478', l: '#080a16' }, bag: { f: '#4a5a6a', s: '#2a3644', h: '#7a90a0', l: '#10161e' } });
+const BUSFX = { tint: [.96, 1.0, .98], shadowTint: [.06, .12, .2], bloom: .75 }, COLD = { tint: [.86, .98, 1.08], shadowTint: [.03, .1, .22], bloom: 1.0, sat: .92, flick: .06 },
+  WARM = { tint: [1.07, 1.0, .88], shadowTint: [.16, .08, .05], bloom: .95 }, NIGHT = { tint: [.98, .97, 1.04], bloom: .9 };
+const tk = (t, a = 'talk', b = 'closed') => [a, 'smileopen', b, a][Math.floor(t * 9) % 4];
+const ckt = (S, i) => chunks(S.L)[Math.min(i, chunks(S.L).length - 1)].s - S.s0;   // start of phrase i, in shot time
+
+// ---------- building blocks ----------
+function busClock(txt, x, y, s = 1, a = 1) { rawBoth((ctx, em) => { ctx.translate(x, y); ctx.scale(s, s);
+  if (!em) { ctx.fillStyle = '#0c0818'; ctx.beginPath(); ctx.roundRect(-190, -80, 380, 160, 14); ctx.fill(); ctx.strokeStyle = '#5a6a88'; ctx.lineWidth = 6; ctx.stroke(); ctx.fillStyle = '#1c0a10'; ctx.fillRect(-170, -60, 340, 120); }
+  else { ctx.fillStyle = '#000'; ctx.fillRect(-190, -80, 380, 160); }
+  ctx.font = '800 112px Mukta'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  if (em) { ctx.strokeStyle = rgba('#ff2a2a', .9 * a); ctx.lineWidth = 9; ctx.strokeText(txt, 0, 6); ctx.fillStyle = rgba('#ff8a60', a); ctx.fillText(txt, 0, 6); }
+  else { ctx.fillStyle = '#ff5a48'; ctx.fillText(txt, 0, 6); } }); }
+function maa(t, o = {}) { const s = o.s || 2, P = PM;
+  c.save(); c.translate(o.x ?? 540, o.y ?? 870); c.scale((o.dir || 1) * s, s);
+  head(c, P, { kind: 'old', view: 'q', expr: o.expr || 'neutral', E: o.E || {} });
+  if (o.phone) { cel(c, limb([-96, 200], [-92, 80], 60, 50), { f: P.skin.f, s: P.skin.s, so: [-6, 0], l: P.skin.l, lw: LS }); cel(c, rrp(-106, -24, 30, 122, 8), { f: '#2a2030', l: '#05050c', lw: 2, h: '#8a7a9a', ho: [2, 2] }); }
+  c.restore(); flush(); }
+function maaShot(S, o) { win(540, 900); homeBg(); airbrush(g, 900, 800, 600, 500, '#ffa040', .2); maa(S.t, o); return WARM; }
+function phoneShot(S, o = {}) { const { t, lt } = S, col = o.col || '#3ad26a', jx = o.shake ? Math.round((hash(Math.floor(lt * 12)) - .5) * o.shake * 5) : 0, jy = o.shake ? Math.round((hash(Math.floor(lt * 12) + 7) - .5) * o.shake * 4) : 0, rot = o.rot ?? -.07;
+  win(540, 900);
+  if (o.home) { homeBg(); g.fillStyle = '#5a3a26'; g.fillRect(-300, 1010, 1700, 600); airbrush(g, 160, 900, 500, 400, '#ffa040', .22); }
+  else { roomBg(t, {}); g.fillStyle = rgba('#04060e', .55); g.fillRect(-300, 300, 1700, 1300); }
+  const SK = PA.bus.skin, st = { f: SK.f, s: SK.s, so: [-8, -3], l: SK.l, lw: 3 };
+  c.save(); c.translate(540 + jx, 900 + jy); c.rotate(rot);
+  if (o.hand) cel(c, limb([330, 520], [70, 150], 230, 190), st);
+  cel(c, rrp(-150, -275, 300, 550, 40), { f: '#1c1c2c', s: '#0c0c18', so: [-8, -6], l: '#05050c', lw: 4, h: '#5a5a88', ho: [3, 3] });
+  if (o.hand) cel(c, limb([210, 190], [128, 90], 70, 54), st);
+  c.restore(); flush();
+  if (!o.off) both((ctx, em) => { ctx.save(); ctx.translate(540 + jx, 900 + jy); ctx.rotate(rot); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = em ? rgba('#6080ff', .16) : '#0e1830'; ctx.beginPath(); ctx.roundRect(-132, -240, 264, 480, 22); ctx.fill();
+    ctx.fillStyle = em ? rgba('#ffd08a', .3) : '#3a4a78'; ctx.beginPath(); ctx.arc(0, -140, 52, 0, TAU); ctx.fill();
+    ctx.fillStyle = em ? rgba('#ffffff', .5) : '#f4f6ff'; ctx.font = '800 76px Mukta'; ctx.fillText('माँ', 0, -30);
+    ctx.fillStyle = em ? rgba(col, .5) : col; ctx.font = '600 28px Mukta'; ctx.fillText(o.status || '', 0, 40);
+    ctx.beginPath(); ctx.arc(0, 150, 40, 0, TAU); ctx.fill();
+    if (o.ring) { ctx.strokeStyle = rgba(col, em ? .5 : .8); ctx.lineWidth = 4; const r = 46 + ((lt * 60) % 50); ctx.globalAlpha = 1 - (r - 46) / 50; ctx.beginPath(); ctx.arc(0, 150, r, 0, TAU); ctx.stroke(); }
+    ctx.restore(); });
+  return o.home ? WARM : NROOM; }
+function endCard(u) { rawBoth((ctx, em) => { if (!em) { const gr = ctx.createLinearGradient(0, 0, 0, OH); gr.addColorStop(0, '#1626c8'); gr.addColorStop(1, '#0e1aa0'); ctx.fillStyle = gr; } else ctx.fillStyle = rgba('#2030ff', .1); ctx.fillRect(0, 0, OW, OH);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = em ? rgba('#ffffff', .35) : '#fff0a0'; ctx.font = '120px Rozha'; ctx.fillText('कहानी कैसी लगी?', OW / 2, 430);
+  if (u > .6) { ctx.font = '800 58px Mukta'; ctx.fillStyle = em ? rgba('#8ff4ff', .3) : '#8ff4ff'; ctx.fillText('कमेंट में बताइए  ·  चैनल सब्सक्राइब करें', OW / 2, 640); } }); return { bloom: .6 }; }
+function homeBg() { vgrad(g, -300, 200, 1700, 1400, [[0, '#4a2e26'], [.6, '#33201e'], [1, '#1c1216']]); g.fillStyle = '#241418'; g.fillRect(-300, 1130, 1700, 500);
+  g.strokeStyle = rgba('#1a0c10', .5); g.lineWidth = 3; for (let x = -200; x < 1400; x += 150) { g.beginPath(); g.moveTo(x, 300); g.lineTo(x, 1130); g.stroke(); } }
+
+// ---------- episode 2 sets: the rented room, the lane, the gate ----------
+const NROOM = { tint: [.9, .95, 1.1], shadowTint: [.04, .06, .2], bloom: .85 }, DAY = { tint: [1.06, 1.0, .9], shadowTint: [.12, .08, .05], bloom: .7 },
+  SEPIA = { sat: .3, tint: [1.12, .98, .8], shadowTint: [.14, .08, .02], fade: .2, bloom: .6 }, DREAD = { tint: [1.08, .86, .9], shadowTint: [.2, .02, .06], bloom: 1, flick: .1 };
+const knock = (lt, at) => at.some(a => lt > a && lt < a + .12);
+const jit = (lt, a, s = 1) => a ? [Math.round((hash(Math.floor(lt * 24)) - .5) * 14 * s), Math.round((hash(Math.floor(lt * 24) + 5) - .5) * 8 * s)] : [0, 0];
+const WOOD = { f: '#6a4428', s: '#45281a', so: [-10, -6], h: '#94663e', ho: [4, 4], l: '#1e0e06', lw: 4 };
+function roomBg(t, o = {}) {   // door 760..960 x 640..1130; cot on the left; bulb hanging at 380
+  const dk = o.dark || 0, bul = o.bulb ?? (hash(Math.floor(t * 10) * 1.7) > .06 ? 1 : .55);
+  vgrad(g, -300, 300, 1700, 900, [[0, '#3c3654'], [.7, '#2c2740'], [1, '#221d30']]); g.fillStyle = '#2a1f22'; g.fillRect(-300, 1130, 1700, 400);
+  g.strokeStyle = rgba('#120c1a', .35); g.lineWidth = 2; for (let y = 700; y < 1130; y += 70) { g.beginPath(); g.moveTo(-300, y + 12); g.lineTo(1400, y); g.stroke(); }
+  g.fillStyle = rgba('#14101e', .5); g.beginPath(); g.ellipse(120, 760, 90, 60, .4, 0, TAU); g.fill();   // damp patch
+  // window (left) — dawn light option
+  cel(c, rrp(40, 690, 170, 210, 4), { f: o.dawn ? '#9ab8e8' : '#0e1430', l: '#120a10', lw: 5 }); line(c, path([[125, 690], [125, 900]]), '#3a2a20', 8); line(c, path([[40, 795], [210, 795]]), '#3a2a20', 8);
+  // door
+  cel(c, rrp(745, 625, 230, 512, 4), { f: '#2a1810', l: '#0c0604', lw: 4 });
+  if (o.open) { cel(c, rrp(760, 640, 200, 490, 2), { f: '#000000', l: '#000', lw: 2 }); cel(c, [[760, 640], [760 + 120 * o.open, 610], [760 + 120 * o.open, 1160], [760, 1130]], WOOD); }
+  else { cel(c, rrp(760, 640, 200, 490, 3), WOOD); for (const [y, h] of [[670, 190], [890, 210]]) cel(c, rrp(785, y, 150, h, 4), { f: '#5a3820', s: '#3a2214', so: [8, 6], l: '#1e0e06', lw: 3 });
+    const lx = 790 + (o.rattle ? Math.round((hash(Math.floor(t * 30)) - .5) * 10) : 0);
+    cel(c, rrp(775, 860, 34, 80, 4), { f: '#4a4a52', s: '#2a2a32', so: [-3, -3], h: '#9a9aa8', ho: [1, 1], l: '#0a0a10', lw: 2.5 });
+    cel(c, rrp(lx - 40, 888, 110, 16, 6), { f: '#5a5a66', s: '#30303a', so: [-2, -2], h: '#b8b8c8', ho: [1, 1], l: '#0a0a10', lw: 2.5 });
+    const ring = new Path2D(); ring.arc(lx + 66, 912, 16, 0, TAU); line(c, ring, '#2a2a32', 6); }
+  // cot + table
+  cel(c, rrp(40, 1040, 420, 34, 6), WOOD); for (const x of [56, 430]) cel(c, rrp(x, 1060, 22, 90, 4), WOOD);
+  c.save(); c.beginPath(); c.rect(50, 1008, 400, 36); c.clip(); c.strokeStyle = '#b89a6a'; c.lineWidth = 3; for (let x = 0; x < 500; x += 26) { c.beginPath(); c.moveTo(x, 1008); c.lineTo(x + 40, 1044); c.moveTo(x + 40, 1008); c.lineTo(x, 1044); c.stroke(); } c.restore();
+  cel(c, rrp(36, 996, 428, 20, 6), WOOD);
+  if (o.bag) cel(c, rrp(110, 940, 170, 70, 18), { f: '#3a5a8a', s: '#243a60', so: [-8, -6], h: '#6a8ac0', ho: [3, 3], l: '#0a1428', lw: 3 });
+  cel(c, rrp(520, 960, 170, 22, 4), WOOD); for (const x of [530, 664]) cel(c, rrp(x, 980, 16, 150, 3), WOOD);
+  if (o.cup) { cel(c, [[580, 905, 1], [630, 905, 1], [624, 958], [586, 958]], { f: '#e8dcc0', s: '#b0a080', so: [-5, 0], l: '#3a2a10', lw: 2.5 }); cel(c, path([[584, 912, 1], [626, 912, 1], [626, 920], [584, 920]]), { f: '#8a5a2a', l: '#3a2a10', lw: 1 }); }
+  // hanging bulb
+  line(c, path([[380, 590], [380, 676]]), '#0a0808', 3); const B = new Path2D(); B.ellipse(380, 692, 16, 20, 0, 0, TAU); cel(c, B, { f: bul > .8 ? '#fff4c0' : '#8a7a50', l: '#2a2010', lw: 2 });
+  if (dk) tintCels('#05060f', dk); flush();
+  if (o.gap) { const a = o.gap; g.fillStyle = rgba('#ffe0a0', .95 * a); g.fillRect(762, 1128, 196, 6); e.fillStyle = rgba('#ffc060', .9 * a); e.fillRect(762, 1126, 196, 10); airbrush(e, 860, 1134, 140, 18, '#ffb050', .5 * a); }
+  airbrush(e, 380, 692, 60, 60, '#ffe0a0', .55 * bul * (1 - dk)); airbrush(g, 380, 760, 520, 420, '#ffd890', .12 * bul * (1 - dk));
+  if (o.dawn) airbrush(e, 125, 795, 160, 160, '#c8e0ff', .4 * o.dawn);
+  veil('#02030a', dk * .4); }
+function rohan(t, o = {}) { const s = o.s || 2, P = o.P || PA.bus;
+  c.save(); c.translate((o.x ?? 540) + (o.jx || 0), (o.y ?? 870) + (o.jy || 0)); c.scale((o.dir || 1) * s, s);
+  head(c, P, { kind: 'arjun', view: o.view || 'q', expr: o.expr || 'neutral', E: o.E || {} });
+  if (o.key) { cel(c, limb([-96, 230], [-80, 90], 66, 56), { f: P.skin.f, s: P.skin.s, so: [-6, 0], l: P.skin.l, lw: LS }); const k = new Path2D(); k.arc(-78, 40, 20, 0, TAU); line(c, k, '#c8a040', 9); cel(c, rrp(-82, 58, 10, 70, 3), { f: '#d8b050', l: '#4a3008', lw: 2 }); }
+  if (o.phone) { cel(c, limb([-96, 200], [-92, 80], 64, 54), { f: P.skin.f, s: P.skin.s, so: [-6, 0], l: P.skin.l, lw: LS }); cel(c, rrp(-106, -24, 30, 122, 8), { f: '#1a1a2a', l: '#05050c', lw: 2, h: '#6a6a9a', ho: [2, 2] }); }
+  c.restore(); if (o.tint) tintCels(o.tint[0], o.tint[1]); flush(); }
+function amma(t, o = {}) { const s = o.s || 2, P = o.P || PO.bus, x = o.x ?? 540, y = o.y ?? 870;
+  c.save(); c.translate(x, y); c.scale((o.dir || 1) * s, s); LWK.k = o.lwk || 1;
+  head(c, P, { kind: 'old', view: o.view || 'q', expr: o.expr || 'neutral', light: o.light, skinRim: o.rim, E: o.E || {} }); LWK.k = 1;
+  if (o.glasses) { for (const [ex, ey] of [[-21, 23], [35, 21]]) { const p = new Path2D(); p.ellipse(ex, ey, 17, 14, 0, 0, TAU); line(c, p, '#2a1a10', 3.2); } line(c, path([[-4, 21], [18, 20]]), '#2a1a10', 2.6); }
+  if (o.keys) { const kx = -110, ky = 175 + Math.sin(t * 5) * 3, r = new Path2D(); r.arc(kx, ky, 18, 0, TAU); line(c, r, '#a88a40', 4);
+    for (let i = 0; i < 4; i++) { c.save(); c.translate(kx + (i - 1.5) * 10, ky + 16); c.rotate((i - 1.5) * .3); cel(c, rrp(-3, 0, 7, 40, 2), { f: i % 2 ? '#c8b060' : '#9aa0a8', l: '#2a2010', lw: 1.6 }); c.restore(); } }
+  if (o.wave) { const a = Math.sin(t * 7) * .35; c.save(); c.translate(120, 150); c.rotate(-.4 + a); cel(c, limb([0, 0], [10, -130], 34, 28), { f: P.sari.f, s: P.sari.s, l: P.sari.l, lw: 2 }); const h = new Path2D(); h.ellipse(10, -150, 20, 24, 0, 0, TAU); cel(c, h, { f: P.skin.f, l: P.skin.l, lw: 2 }); c.restore(); }
+  c.restore(); if (o.tint) tintCels(o.tint[0], o.tint[1]); flush();
+  if (o.glow) for (const [ex, ey] of [[-21, 23], [35, 21]]) { airbrush(e, x + ex * s, y + ey * s, 8 * s, 8 * s, '#bffcff', .9 * o.glow); airbrush(e, x + ex * s, y + ey * s, 30 * s, 30 * s, '#35e7ff', .3 * o.glow); } }
+function chowk(t, o = {}) { const s = o.s || 2, P = o.P || PC.day, x = o.x ?? 600, y = o.y ?? 880;
+  c.save(); c.translate(x, y); c.scale((o.dir || 1) * s, s);
+  head(c, P, { kind: 'cond', view: 'side', expr: o.expr || 'neutral', E: o.E || {} });
+  if (o.beedi) { cel(c, rrp(78, 72, 46, 8, 3), { f: '#c8a070', l: '#3a2410', lw: 1.6 }); }
+  c.restore(); flush();
+  if (o.beedi) { const d = o.dir || 1, bx = x + d * 124 * s, by = y + 76 * s; airbrush(e, bx, by, 8, 8, '#ff7020', .9 * (.6 + .4 * Math.sin(t * 6)));
+    for (let i = 0; i < 6; i++) { const u = ((t * .35 + i / 6) % 1); airbrush(g, bx + d * (Math.sin(u * 7 + i) * 30), by - u * 300, 20 + u * 70, 20 + u * 70, '#e8e4f0', .16 * (1 - u)); } } }
+function laneBg(t, o = {}) { const day = o.day;
+  vgrad(g, -300, 300, 1700, 500, day ? [[0, '#8ac0e8'], [1, '#f0d8b0']] : [[0, '#05061a'], [1, '#1a1440']]);
+  if (!day) airbrush(e, 900, 640, 50, 50, '#f0f0ff', .7);
+  for (const [x0, w, h, col] of [[-300, 340, 520, day ? '#b89a7a' : '#1a1630'], [780, 560, 480, day ? '#a88a6c' : '#16122a']]) { g.fillStyle = col; g.fillRect(x0, 1150 - h, w, h + 10);
+    g.fillStyle = day ? '#5a4030' : '#0a0818'; for (let yy = 1150 - h + 40; yy < 1080; yy += 120) for (let xx = x0 + 40; xx < x0 + w - 60; xx += 130) g.fillRect(xx, yy, 60, 70); }
+  cel(c, rrp(300, 600, 480, 560, 2), { f: day ? '#c8a888' : '#2a2442', s: day ? '#9a7a60' : '#1a1630', so: [-14, 0], l: '#0a0610', lw: 5 });
+  for (const yy of [770, 920]) cel(c, rrp(290, yy, 500, 16, 2), { f: day ? '#9a7a60' : '#1e1834', l: '#0a0610', lw: 3 });
+  for (const [wx, wy, lit] of [[360, 640, 0], [500, 640, 1], [640, 640, 0], [360, 800, 0], [640, 800, 0]]) cel(c, rrp(wx, wy, 80, 100, 3), { f: lit && !day ? '#ffcf70' : day ? '#4a3a30' : '#0c0a18', l: '#0a0610', lw: 4 });
+  cel(c, rrp(470, 960, 140, 196, 3), WOOD);
+  const sw = Math.sin(t * 1.6) * .05; c.save(); c.translate(540, 930); c.rotate(sw); line(c, path([[-50, -4], [0, -40], [50, -4]]), '#2a1a10', 3);
+  cel(c, rrp(-90, 0, 180, 56, 4), { f: '#e8dcb8', s: '#b8a880', so: [-4, -4], l: '#3a2a10', lw: 3 }); c.restore();
+  g.fillStyle = day ? '#8a7a6a' : '#100c1c'; g.fillRect(-300, 1150, 1700, 400); flush();
+  both((ctx, em) => { ctx.save(); ctx.translate(540, 930); ctx.rotate(sw); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '800 30px Mukta'; ctx.fillStyle = em ? rgba('#000', 0) : '#5a1010'; ctx.fillText('कमरा ख़ाली है', 0, 30); ctx.restore(); });
+  if (!day) { airbrush(e, 540, 690, 50, 60, '#ffb040', .6); airbrush(g, 160, 1000, 260, 300, '#ffb050', .12); }
+  if (o.amma) { c.save(); c.beginPath(); c.rect(500, 640, 80, 100); c.clip(); c.restore(); amma(t, { x: 540, y: 690, s: .35, P: PO.cold, wave: 1, lwk: 2.4 }); } }
+function gateBg(t) { vgrad(g, -300, 300, 1700, 900, [[0, '#d8b888'], [1, '#a8845c']]); g.fillStyle = '#7a6048'; g.fillRect(-300, 1110, 1700, 400);
+  g.fillStyle = rgba('#5a4030', .25); for (let x = -200; x < 1400; x += 90) g.fillRect(x, 300, 4, 810);
+  airbrush(g, 200, 700, 500, 400, '#fff0c0', .3);
+  for (let x = 700; x < 1150; x += 42) cel(c, rrp(x, 640, 12, 480, 3), { f: '#2a3a3a', h: '#6a8a8a', ho: [2, 0], l: '#0a1010', lw: 2 });
+  for (const y of [680, 900, 1080]) cel(c, rrp(690, y, 460, 14, 3), { f: '#2a3a3a', l: '#0a1010', lw: 2 }); flush(); }
+function stairsBg(t, fl) { vgrad(g, -300, 300, 1700, 900, [[0, '#14101e'], [1, '#05040a']]);
+  for (let i = 0; i < 9; i++) { const y = 640 + i * 64, x = 260 + i * 60; cel(c, [[x, y], [x + 520, y], [x + 520, y + 64], [x, y + 64]], { f: mix('#3a3250', '#0a0814', i / 9), l: '#05040a', lw: 3 }); cel(c, rrp(x, y, 520, 10, 2), { f: '#5a5070', l: '#05040a', lw: 2 }); }
+  line(c, path([[200, 620], [820, 1200]]), '#1a1420', 14); flush(); airbrush(e, 700, 600, 120, 120, '#ffe0a0', .5 * fl); airbrush(g, 700, 700, 500, 500, '#ffd890', .14 * fl); }
+function clockShot(S, txt, o = {}) { win(); g.fillStyle = '#05061a'; g.fillRect(-300, 300, 1700, 1300); busClock(txt, OW / 2, 470, 2.1, o.blink ? (Math.floor(S.lt * 3) % 2 ? 1 : .35) : 1); return { bloom: 1, ...(o.rew ? { track: .5, osd: x => osdRew(x, o.rew, Math.floor(S.lt * 6) % 2 === 0) } : {}) }; }
+function doorShot(S, o = {}) { const { t, lt } = S, kn = o.knock ? knock(lt, o.knock) : 0, [jx, jy] = jit(lt, kn || o.shake, o.amp || 1), z = (o.k || 2.2) + (o.zoom || 0) * S.u;
+  win(860 + jx / 3, (o.cy || 900) + jy / 3, z); roomBg(t, { gap: o.gap ?? 1, rattle: o.rattle, dark: o.dark ?? .25, open: o.open });
+  if (o.red) veil('#3a0008', o.red); return o.fx || NROOM; }
+function latchShot(S, o = {}) { const { t, lt } = S; win(810, 900, 4.2); roomBg(t, { rattle: o.rattle, dark: .2, gap: 1 });
+  if (o.hand) { const P = PA.bus, st = { f: P.skin.f, s: P.skin.s, so: [-6, -3], l: P.skin.l, lw: 2 }, hx = lerp(640, 800, eio(prog(lt, 0, 1.2)));
+    c.save(); c.translate(hx, 905); cel(c, limb([-260, 70], [-20, 0], 70, 52), st); const h = new Path2D(); h.ellipse(0, -2, 34, 26, -.2, 0, TAU); cel(c, h, st); c.restore(); flush(); }
+  return NROOM; }
+function inRoom(S, ro, rb = {}) { win(540, 900); roomBg(S.t, { dark: .15, gap: rb.gap ?? 0, ...rb }); rohan(S.t, { x: 360, y: 900, s: 1.8, ...ro }); return NROOM; }
+function gapShot(S) { const { t, lt } = S; win(860, 1128, 9); roomBg(t, { gap: 1, dark: .3 }); g.fillStyle = rgba('#000', .3); g.fillRect(700, 1000, 300, 128);
+  const sx = lerp(770, 950, (lt * .25) % 1); airbrush(e, sx, 1131, 30, 6, '#ffffff', .4); return { ...NROOM, flick: .1 }; }
+function ghostCorner(S, o = {}) { const { t, lt } = S, fr = Math.floor(st8(lt) * 8), z = o.z || 2.1, cy = o.cy ?? 900;
+  win(540, cy); roomBg(t, { dark: .55, gap: .5 });
+  if (o.feet) { const fy = 1060 + Math.sin(t * 2) * 8; cel(c, [[430, 880], [650, 880], [700, fy], [380, fy]], { f: PO.cold.sari.f, s: PO.cold.sari.s, so: [-14, 0], l: PO.cold.sari.l, lw: 3 }); tintCels('#9ff8ff', .2); flush();
+    g.fillStyle = rgba('#000', .5); g.beginPath(); g.ellipse(540, 1130, 140, 14, 0, 0, TAU); g.fill(); airbrush(e, 540, fy, 200, 30, '#35e7ff', .35); }
+  amma(t, { x: 540, y: 820, s: z, P: PO.cold, expr: 'neutral', light: [-.35, .95], rim: '#7fffe0', glow: 1, E: { open: 1, lid: .15, iris: .62, look: o.look || [.1, .05], brow: [-6, 4, 2], mouth: S.sp ? tk(t, 'talk', 'closed') : 'closed' } });
+  airbrush(e, 540, 900, 420, 420, '#35e7ff', .12); return COLD; }
+function flashRoom(S, o = {}) { win(540, 900 + 0 * S.u); roomBg(S.t, { dark: .1, open: o.open, cup: o.cup, bulb: 1 });
+  if (o.open) airbrush(e, 860, 880, 200, 300, '#000', 0); return { ...SEPIA, track: S.lt < .4 ? 1 : 0, osd: x => osdRew(x, o.lab || 'पहले', Math.floor(S.lt * 2.5) % 2 === 0) }; }
+function laneShot(S, o = {}) { const z = o.k || KK, k = eio(prog(S.u, 0, 1)); win(lerp(o.x0 ?? 540, o.x1 ?? 540, k), lerp(o.y0 ?? 900, o.y1 ?? 900, k), lerp(z, o.k1 || z, k)); laneBg(S.t, o); return o.day ? DAY : NIGHT; }
+function ammaDoor(S, o = {}) { const k = (o.k || KK) + (o.zoom || 0) * S.u; win(540, o.cy || 900, k);
+  vgrad(g, -300, 300, 1700, 1000, [[0, '#2a1a14'], [1, '#0a0605']]); airbrush(g, 700, 760, 400, 400, '#ffb060', .14);
+  for (const x of [120, 870]) cel(c, rrp(x, 560, 90, 700, 4), WOOD); flush();
+  amma(S.t, { x: 540, y: 880, s: 2, glasses: o.glasses ?? 1, keys: o.keys ?? 1, P: PO.bus, E: o.E || { look: [.2, .05], mouth: S.sp ? tk(S.t, 'talk', 'closed') : 'closed' } });
+  if (o.cold) veil('#06162a', o.cold); return { tint: [1.03, .98, .94], shadowTint: [.1, .05, .1], bloom: .8 }; }
+function laneRo(S, ro, o = {}) { win(540, 900); laneBg(S.t, o); veil(o.day ? '#40302a' : '#04030c', .35); rohan(S.t, { P: o.day ? PA.day : PA.bus, ...ro }); return o.day ? DAY : NIGHT; }
+function gateRo(S, ro) { win(540, 900); gateBg(S.t); rohan(S.t, { P: PA.day, x: 560, ...ro }); return DAY; }
+function gateCh(S, o = {}) { const k = (o.k || KK) + (o.zoom || 0) * S.u; win(o.cx || 540, o.cy || 900, k); gateBg(S.t);
+  chowk(S.t, { x: 520, y: 860, s: 2, beedi: o.beedi ?? 1, E: o.E || { mouth: S.sp ? tk(S.t, 'talk', 'closed') : 'closed', look: [.6, 0] } }); return DAY; }
+function walker(t, x, s = .5, P = PA.day) { c.save(); c.translate(x, 1150); c.scale(s, s); figure(P, { walk: 1, ph: st12(t) * 12 * .9 }); c.restore(); flush(); }
+
+// ---------- the shots, one per line ----------
+const KN3 = a => [a, a + .32, a + .64];
+const SH = {
+  h1: S => S.lt < ckt(S, 1) ? clockShot(S, '12:02') : doorShot(S, { knock: KN3(ckt(S, 2) + .3), zoom: .3 }),
+  h2: S => doorShot(S, { k: 2.4, zoom: .5, fx: { ...NROOM, tint: [1.04, .96, 1.0] } }),
+  h3: S => S.lt < ckt(S, 2) ? inRoom(S, { x: lerp(330, 520, eio(prog(S.lt, 0, ckt(S, 2)))), E: { ...EXPR.surprised, look: [.8, 0] } }, { gap: 1 }) : phoneShot(S, { status: 'कॉल आ रही है…', ring: 1, shake: 1.5, hand: 1 }),
+  h4: S => S.lt < ckt(S, 3) ? doorShot(S, { k: 2.2, zoom: 1.2, dark: .4 }) : clockShot(S, '12:02', { rew: '3 दिन पहले' }),
+  a1: S => { win(540, 900); laneBg(S.t, { day: 0 }); walker(S.t, lerp(-60, 420, S.u), .5, PA.street); return NIGHT; },
+  a2: S => S.lt < ckt(S, 2) ? laneShot(S, { x0: 540, x1: 540, y0: 900, y1: 880 }) : laneShot({ ...S, u: prog(S.lt, ckt(S, 2), S.d - ckt(S, 2)) }, { x0: 540, y0: 880, x1: 540, y1: 958, k1: 4.2 }),
+  a3: S => ammaDoor(S, { zoom: .2, E: { look: [.2, .05], mouth: 'closed' } }),
+  a4: S => ammaDoor(S, { E: { ...EXPR.smile, mouth: S.sp ? tk(S.t, 'talk', 'smile') : 'smile' } }),
+  a5: S => laneRo(S, { E: { ...EXPR.surprised, mouth: S.sp ? tk(S.t, 'talk', 'oh') : 'oh', look: [.1, 0] } }),
+  a6: S => ammaDoor(S, { zoom: .3, E: { lid: .25, brow: [4, -2, 2], look: [.1, 0], mouth: S.sp ? tk(S.t, 'talk', 'closed') : 'closed' } }),
+  b1: S => { const off = S.lt > ckt(S, 1) - .2; return ammaDoor(S, { glasses: !off, zoom: off ? .5 : 0, cold: off ? .2 : 0, E: off ? { open: 1.05, lid: -.05, iris: .62, look: [0, 0], brow: [7, -5, 2], mouth: 'closed' } : { lid: .3, look: [.1, .3], mouth: 'closed' } }); },
+  b2: S => ammaDoor(S, { glasses: 0, k: 2.3, cy: 860, zoom: .5, cold: .3, E: { open: 1.05, lid: -.05, iris: .6, look: [0, 0], brow: [8, -6, 2], mouth: S.sp ? tk(S.t, 'talk', 'closed') : 'closed' } }),
+  b3: S => laneRo(S, { E: { ...EXPR.confused, mouth: S.sp ? tk(S.t, 'talk', 'frown') : 'frown' } }),
+  b4: S => ammaDoor(S, { glasses: 0, k: 2.8, cy: 850, cold: .35, E: { open: .9, lid: .2, iris: .6, look: [0, 0], brow: [6, -4, 2], mouth: S.sp ? tk(S.t, 'talk', 'closed') : 'closed' } }),
+  b5: S => S.lt < ckt(S, 3) ? laneRo(S, { E: { ...EXPR.smileopen, mouth: Math.floor(S.lt * 6) % 2 ? 'smileopen' : 'grin' } }) : inRoom(S, { E: EXPR.smile }, { bag: 1, dark: 0 }),
+  c1: S => { const k = eio(prog(S.lt, 0, S.d)); win(lerp(420, 820, k), 900, lerp(KK, 3.4, k)); roomBg(S.t, { bag: 1, dark: .15 }); return NROOM; },
+  c2: S => S.lt < ckt(S, 1) ? clockShot(S, '12:00') : S.lt < ckt(S, 4) ? (win(540, 900), stairsBg(S.t, hash(Math.floor(S.lt * 10)) > .1 ? 1 : .3), { ...NROOM, flick: .12 }) : doorShot(S, { knock: KN3(ckt(S, 6)), zoom: .4 }),
+  c3: S => doorShot(S, { k: 2.4, zoom: .4 }),
+  c4: S => S.lt < ckt(S, 1) ? latchShot(S, { hand: 1 }) : inRoom(S, { x: 540, s: 2.1, E: { ...EXPR.fear, look: [.6, 0], mouth: 'closed' } }),
+  c5: S => inRoom(S, { x: 540, s: 2.1, E: { ...EXPR.hurt, look: [.7, 0], mouth: S.sp ? tk(S.t, 'talk', 'frown') : 'frown' } }),
+  c6: S => doorShot(S, { k: 2, zoom: .8, dark: .5, gap: 1 - prog(S.lt, ckt(S, 1), 2) * .4 }),
+  d1: S => gateCh(S, { zoom: .2 }),
+  d2: S => gateRo(S, { E: { ...EXPR.confused, look: [-.6, 0], mouth: S.sp ? tk(S.t, 'talk', 'frown') : 'frown' } }),
+  d3: S => gateCh(S, { k: 2.1, cy: 880, cx: 640 }),
+  d4: S => S.lt < ckt(S, 2) ? gateRo(S, { E: { ...EXPR.confused, look: [-.6, 0], mouth: S.sp ? tk(S.t, 'talk', 'frown') : 'frown' } }) : gateCh(S, { beedi: 0, k: 2.1, cx: 640, cy: 880, E: { lid: .35, look: [-.3, .3], mouth: 'closed' } }),
+  e1: S => S.lt < ckt(S, 2) ? clockShot(S, '12:00') : doorShot(S, { knock: [ckt(S, 2) + .1, ckt(S, 2) + .4, ckt(S, 2) + .7], zoom: .3 }),
+  e2: S => doorShot(S, { k: 2.3, knock: Array.from({ length: 12 }, (_, i) => .1 + i * .45), amp: 1.6, red: .25, fx: DREAD }),
+  e3: S => S.lt < ckt(S, 3) ? inRoom(S, { x: 520, s: 2.1, E: { ...EXPR.fear, look: [.7, 0] } }, { gap: 1 }) : latchShot(S, { hand: 1 }),
+  e4: S => S.lt < ckt(S, 1) ? inRoom(S, { x: 520, s: 2.1, E: { ...EXPR.fear, look: [.5, .9] } }, { gap: 1 }) : gapShot(S),
+  e5: S => S.lt < ckt(S, 2) ? doorShot(S, { k: 2.6, zoom: .4, dark: .5, fx: DREAD }) : (win(540, 900), roomBg(S.t, { dark: .5, gap: 1 }), rohan(S.t, { x: 260, y: 920, s: 1.5, E: { ...EXPR.terror, look: [.8, 0], mouth: 'grit' } }), veil('#000', prog(S.lt, S.d - .6, .6)), NROOM),
+  f1: S => { win(540, 900); gateBg(S.t); chowk(S.t, { x: 300, y: 880, s: 1.7, beedi: 1, E: { look: [.6, 0], mouth: 'closed' } }); rohan(S.t, { P: PA.day, x: 800, y: 880, s: 1.8, dir: -1, E: { ...EXPR.determined, look: [.6, 0] } }); return DAY; },
+  f2: S => S.lt < ckt(S, 2) ? gateCh(S, { k: 2.1, cx: 640, cy: 880, E: { lid: .3, look: [.4, .2], mouth: S.sp ? tk(S.t, 'talk', 'closed') : 'closed' } }) : flashRoom({ ...S, lt: S.lt - ckt(S, 2) }, { open: eio(prog(S.lt, ckt(S, 3), 1.5)), lab: 'पिछला किरायेदार' }),
+  f3: S => flashRoom(S, { cup: 1, lab: 'अगली सुबह' }),
+  f4: S => gateRo(S, { E: { ...EXPR.hurt, look: [-.6, 0], mouth: S.sp ? tk(S.t, 'talk', 'frown') : 'frown' } }),
+  f5: S => gateCh(S, { k: 2.1 + (S.lt > ckt(S, 1) ? .6 * prog(S.lt, ckt(S, 1), 3) : 0), cx: 640, cy: 870, beedi: 0 }),
+  f6: S => { win(540, 900); gateBg(S.t); veil('#200a10', .3); rohan(S.t, { P: PA.day, key: 1, s: 2.1 + .2 * S.u, jx: jit(S.lt, 1, .3)[0], E: { ...EXPR.fear, look: [-.3, .5], mouth: 'wavy' } }); return { ...DAY, sat: .8 }; },
+  g1: S => inRoom(S, { x: 300, y: 930, s: 1.6, E: { lid: .45, open: .8, look: [.6, .3], brow: [-6, 4, 1.5], mouth: 'frown' } }, { bag: 1 }),
+  g2: S => S.lt < ckt(S, 1) ? clockShot(S, '12:02', { blink: 1 }) : doorShot(S, { knock: KN3(ckt(S, 1) + .1), zoom: .3 }),
+  g3: S => doorShot(S, { k: 2.2, zoom: .9, fx: { ...NROOM, tint: [1.06, .98, .96] } }),
+  g4: S => inRoom(S, { x: lerp(360, 600, eio(prog(S.lt, ckt(S, 4), 2))), s: 2, E: { ...EXPR.hurt, tears: true, look: [.8, 0], mouth: 'wavy' } }, { gap: 1 }),
+  g5: S => phoneShot(S, { status: 'कॉल आ रही है…', ring: 1, shake: 2.2, hand: 1 }),
+  g6: S => maaShot(S, { phone: 1, E: { look: [.3, .1], brow: [-5, 3, 2], mouth: S.sp ? tk(S.t) : 'smile' } }),
+  g7: S => S.lt < ckt(S, 1) ? maaShot(S, { phone: 1, E: { look: [.3, .1], mouth: 'closed' } }) : doorShot(S, { k: 2.2, zoom: .6, dark: .4 }),
+  g8: S => doorShot(S, { k: 2.6, cy: 960, zoom: 1.2, red: .35, dark: .45, gap: hash(Math.floor(S.lt * 10)) > .3 ? 1 : .3, fx: DREAD }),
+  g9: S => latchShot(S, { rattle: 1 }) && { ...DREAD, flick: .15 },
+  i1: S => inRoom(S, { x: 540, s: 2.1, dir: S.lt > ckt(S, 1) ? -1 : 1, E: S.lt > ckt(S, 1) ? { ...EXPR.terror, look: [.9, 0], mouth: 'grit' } : { ...EXPR.fear, look: [.6, 0] } }, { gap: 1, dark: .35 }),
+  i2: S => ghostCorner(S, { z: 2.1 }),
+  i3: S => S.lt < ckt(S, 2) ? (win(540, 900), roomBg(S.t, { dark: .4, gap: 1 }), rohan(S.t, { x: 540, s: 2.1, dir: -1, E: { ...EXPR.terror, look: [.9, .1], mouth: 'grit' } }), NROOM) : ghostCorner(S, { z: 1, feet: 1, cy: lerp(880, 1000, eio(prog(S.lt, ckt(S, 2), 2.5))) }),
+  i4: S => ghostCorner(S, { z: 2.1 + .3 * S.u, look: [0, 0] }),
+  i5: S => S.lt < ckt(S, 2) ? doorShot(S, { k: 2.2, shake: 1, amp: 2.5, red: .5, rattle: 1, fx: { ...DREAD, flick: .2 } }) : (win(540, 900), roomBg(S.t, { dawn: prog(S.lt, ckt(S, 3), 3), dark: .2, bulb: 0 }), rohan(S.t, { x: 400, y: 920, s: 1.6, E: { open: .7, lid: .4, look: [-.6, -.2], brow: [-6, 4, 1.5], mouth: 'closed' } }), { ...NROOM, tint: [1.0, 1.0, 1.06] }),
+  j1: S => { win(540, 900); laneBg(S.t, { day: 1 }); walker(S.t, lerp(440, 1180, S.u), .5, PA.day); return DAY; },
+  j2: S => { const k = eio(prog(S.lt, ckt(S, 1), 2.5)); win(540, lerp(900, 700, k), lerp(KK, 4.5, k)); laneBg(S.t, { day: 1, amma: S.lt > ckt(S, 1) }); return DAY; },
+  j3: S => laneShot(S, { x0: 540, y0: 900, x1: 540, y1: 958, k1: 3.8 }),
+  j4: S => { win(540, 958, 4.4); laneBg(S.t); veil('#000', prog(S.lt, S.d - 1.2, 1)); return NIGHT; },
+  j5: S => { const endT = S.L.end + .5 - S.s0; if (S.lt >= endT) return endCard(S.lt - endT); return doorShot(S, { k: 2, zoom: .5, dark: .4 }); },
+};
+
+function resetAll() { for (const x of [g, e, c]) { x._st(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.filter = 'none'; x.shadowColor = 'transparent'; }
+  g.fillStyle = '#000'; g.fillRect(0, 0, OW, OH); e.fillStyle = '#000'; e.fillRect(0, 0, OW, OH); c.clearRect(0, 0, OW, OH); LWK.k = 1; }
+window.render = function (t) {
+  resetAll();
+  const L = T.lines; let i = 0; for (let k = 0; k < L.length; k++) if (t >= L[k].start - .3) i = k;
+  const s0 = i ? L[i].start - .3 : 0, s1 = i < L.length - 1 ? L[i + 1].start - .3 : T.total, lt = t - s0, d = s1 - s0;
+  const over = SH[L[i].id]({ t, lt, d, u: lt / d, L: L[i], s0, sp: t >= L[i].start && t <= L[i].end }) || {};
+  for (const x of [g, e, c]) x._st(1, 0, 0, 1, 0, 0);
+  caption(t); if (over.osd) over.osd(ov);
+  POST.render(sc, gc, Math.round(t * 30), ovc, { power: Math.min(1, t / .6), fade: 0, ...over, ...(t > T.total - 1 ? { expo: Math.max(0, T.total - t) } : {}) });
+};
+window.init = async function (tm) { T = tm;
+  for (const f of ['800 50px Mukta', '600 50px Mukta', '400 50px Rozha']) await document.fonts.load(f, 'रात के बारह 12:02 कमरा ख़ाली है');
+  await document.fonts.ready; POST = makePost(document.getElementById('gl')); buildAssets(); return true; };
+</script>

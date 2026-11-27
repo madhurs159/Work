@@ -1,0 +1,39 @@
+{
+ "narrator": {
+  "ref": "voice_samples/narrator_A.wav",
+  "ref_text": "रात के ग्यारह चालीस। अर्जुन ने आख़िरी बस पकड़ी। बस ख़ाली थी।"
+ },
+ "voices": {
+  "rohan": {
+   "ref_text": "भैया, एक टिकट। शिव नगर।"
+  },
+  "amma": {
+   "ref_text": "बेटा। चिल्लाने से कुछ नहीं होगा।"
+  },
+  "maa": {
+   "ref_text": "फिर वही फ़ोन। रोज़ रात, इसी वक़्त।"
+  },
+  "chowk": {
+   "instruct": "male, middle-aged, low pitch",
+   "ref_text": "साहब, मैं तो रात दस बजे घर चला जाता हूँ।",
+   "seed": 34
+  },
+  "girl": {
+   "instruct": "female, young adult, high pitch",
+   "ref_text": "भैया, प्लीज़ दरवाज़ा खोलिए।",
+   "seed": 35
+  }
+ },
+ "speed": {
+  "narr": 0.88,
+  "rohan": 1.0,
+  "amma": 0.82,
+  "maa": 0.88,
+  "chowk": 0.92,
+  "girl": 1.05
+ },
+ "lead": 0.8,
+ "gap": 0.7,
+ "tail": 3.0,
+ "lines": {}
+}
